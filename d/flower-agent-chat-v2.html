@@ -1,0 +1,2428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>闪购千问</title>
+<style>
+@font-face {
+  font-family: "Alibaba Sans 102";
+  src: url("https://g.alicdn.com/taobaodesign/alibaba-sans-102-taobao-font/0.0.1/AlibabaSans102_v1_TaoBao-Bd.ttf") format("truetype");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Alibaba Sans 102";
+  src: url("https://g.alicdn.com/taobaodesign/alibaba-sans-102-taobao-font/0.0.1/AlibabaSans102_v1_TaoBao-Rg.ttf") format("truetype");
+  font-weight: 400;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 13.333vw; }
+body {
+  font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  background: #F3F6F8;
+  height: 100vh;
+  overflow: hidden;
+}
+.app {
+  width: 100%;
+  max-width: 7.5rem;
+  margin: 0 auto;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Views ===== */
+.view {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.home-view {
+  z-index: 1;
+  background: #F3F6F8;
+  transform: translateX(0);
+}
+.home-view.behind {
+  transform: translateX(-22%);
+}
+.assistant-view {
+  z-index: 2;
+  background: #F3F6F8;
+  transform: translateX(100%);
+  box-shadow: -0.04rem 0 0.24rem rgba(17, 25, 45, 0.06);
+  visibility: hidden;
+  pointer-events: none;
+}
+.assistant-view.opening,
+.assistant-view.active {
+  visibility: visible;
+  pointer-events: auto;
+}
+.assistant-view.active {
+  transform: translateX(0);
+}
+
+/* ===== Nav Bar ===== */
+.nav-bar {
+  height: 1.76rem;
+  background: #FFFFFF;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+.status-bar { height: 0.88rem; }
+.nav-content {
+  height: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.2rem;
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.16rem;
+}
+.nav-icon {
+  width: 0.56rem;
+  height: 0.56rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.nav-icon svg { width: 0.4rem; height: 0.373rem; }
+.nav-title {
+  font-size: 0.36rem;
+  font-weight: 500;
+  color: #11192D;
+}
+.nav-right {
+  width: 0.56rem;
+  height: 0.56rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-right svg { width: 0.4rem; height: 0.4rem; }
+
+/* ===== Home View ===== */
+.home-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.32rem 0.32rem 0.24rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+}
+.home-content::-webkit-scrollbar { display: none; }
+.home-bottom {
+  background: #FFFFFF;
+  padding: 0.18rem 0.24rem 0.56rem;
+  flex-shrink: 0;
+  border-top: 0.01rem solid #F3F6F8;
+}
+.home-toolbar {
+  display: flex;
+  gap: 0.14rem;
+  margin-bottom: 0.18rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.home-toolbar::-webkit-scrollbar { display: none; }
+.home-toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0.12rem 0.24rem;
+  border: 0.015rem solid #E5E8EC;
+  border-radius: 0.12rem;
+  font-size: 0.26rem;
+  color: #11192D;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: #FFFFFF;
+}
+.home-toolbar-item img { width: 0.32rem; height: 0.32rem; }
+.home-input-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.08rem 0.16rem;
+  border: 0.015rem solid rgba(229,232,236,0.8);
+  border-radius: 0.2rem;
+  height: 0.92rem;
+  cursor: pointer;
+}
+.home-input-placeholder {
+  font-size: 0.28rem;
+  color: #7C889C;
+}
+.home-input-hint {
+  text-align: center;
+  font-size: 0.18rem;
+  color: #CACFD7;
+  margin-top: 0.12rem;
+}
+
+/* ===== Assistant Chat Area ===== */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.32rem 0.32rem 0.24rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+}
+.chat-area::-webkit-scrollbar { display: none; }
+
+/* ===== Messages ===== */
+.message-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0.52rem;
+}
+.message-row:last-child { margin-bottom: 0; }
+.message-row.user { justify-content: flex-end; }
+.message-row.assistant { justify-content: flex-start; }
+
+.user-bubble {
+  max-width: 5rem;
+  padding: 0.16rem 0.32rem;
+  background: #FFE6D7;
+  border-radius: 0.12rem;
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.48rem;
+  word-break: break-all;
+}
+
+.assistant-card {
+  width: 100%;
+  max-width: 6.86rem;
+  background: #FFFFFF;
+  border-radius: 0.12rem;
+  overflow: hidden;
+}
+
+/* ===== Welcome Card ===== */
+.welcome-card {
+  background: linear-gradient(180deg, #F9FBFF 0%, #FFFFFF 100%);
+  padding: 0.4rem 0.24rem 0.24rem;
+  border-radius: 0.12rem;
+}
+.welcome-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.32rem;
+}
+.welcome-badge {
+  display: inline-block;
+  padding: 0.04rem 0.14rem;
+  background: linear-gradient(270deg, #FBF8FF 0%, #ECF3FF 100%);
+  border-radius: 0.08rem;
+  font-size: 0.24rem;
+  color: #111111;
+  margin-bottom: 0.08rem;
+}
+.welcome-title {
+  font-size: 0.48rem;
+  font-weight: 500;
+  color: #111111;
+  line-height: 0.67rem;
+}
+.welcome-subtitle {
+  font-size: 0.24rem;
+  color: #666666;
+  margin-top: 0.08rem;
+}
+.welcome-mascot {
+  width: 1.88rem;
+  height: 2.04rem;
+  background-image: url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127934472087409/127934472087410/2281a8c8023980ff9dbe90a3229c174c.png);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.scenario-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+.scenario-item {
+  height: 1.51rem;
+  border-radius: 0.16rem;
+  padding: 0.32rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.scenario-item:active { transform: scale(0.98); }
+.scenario-item:nth-child(1) { background: linear-gradient(270deg, #FBF8FF 0%, #ECF3FF 100%); }
+.scenario-item:nth-child(2) { background: linear-gradient(270deg, #FFFEF8 0%, #FFF5F5 100%); }
+.scenario-item:nth-child(3) { background: linear-gradient(270deg, #FDFFF8 0%, #FDFFEC 100%); }
+.scenario-title {
+  font-size: 0.32rem;
+  color: #111111;
+  line-height: 0.45rem;
+  font-weight: 500;
+}
+.scenario-desc {
+  font-size: 0.24rem;
+  color: #666666;
+  margin-top: 0.08rem;
+  line-height: 0.34rem;
+}
+
+/* ===== Address Card ===== */
+.address-card { padding: 0.24rem; }
+.address-text {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.46rem;
+  margin-bottom: 0.16rem;
+}
+.address-current {
+  display: flex;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0.12rem 0;
+  margin-bottom: 0.16rem;
+}
+.address-current svg { width: 0.32rem; height: 0.32rem; flex-shrink: 0; }
+.address-current span {
+  font-size: 0.28rem;
+  color: #11192D;
+}
+.address-actions {
+  display: flex;
+  gap: 0.16rem;
+}
+.address-btn {
+  flex: 1;
+  height: 0.8rem;
+  border-radius: 0.12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+.address-btn.secondary {
+  background: #F3F6F8;
+  color: #50607A;
+}
+.address-btn.primary {
+  background: #FF6200;
+  color: #FFFFFF;
+}
+
+/* ===== Clarify Card ===== */
+.clarify-card { padding: 0.24rem; }
+.clarify-header {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+  margin-bottom: 0.16rem;
+}
+.clarify-header span {
+  font-size: 0.28rem;
+  color: #50607A;
+}
+.clarify-header svg { width: 0.28rem; height: 0.28rem; }
+.clarify-title {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.08rem;
+}
+.clarify-desc {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.5rem;
+  margin-bottom: 0.24rem;
+}
+.clarify-question {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.16rem;
+}
+.clarify-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+.clarify-option {
+  display: flex;
+  align-items: center;
+  gap: 0.16rem;
+  padding: 0.24rem;
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  cursor: pointer;
+  background: #FFFFFF;
+  transition: all 0.15s;
+}
+.clarify-option:active { background: #F9FBFF; }
+.option-checkbox {
+  width: 0.32rem;
+  height: 0.32rem;
+  border: 0.035rem solid #CACFD7;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.option-text {
+  font-size: 0.28rem;
+  color: #11192D;
+}
+
+/* ===== Thinking Card ===== */
+.thinking-card { padding: 0.24rem; position: relative; }
+.thinking-steps-container {
+  position: relative;
+}
+.thinking-step-group {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(0.2rem);
+  transition: all 0.5s ease;
+}
+.thinking-step-group.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.thinking-step-group .thinking-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.16rem;
+  margin-bottom: 0.08rem;
+}
+.thinking-step-group .thinking-step svg { width: 0.3rem; height: 0.3rem; flex-shrink: 0; margin-top: 0.02rem; }
+.thinking-step-group .thinking-step-title {
+  font-size: 0.28rem;
+  color: #50607A;
+  line-height: 0.36rem;
+}
+.thinking-step-group .thinking-step-desc {
+  font-size: 0.28rem;
+  color: #50607A;
+  line-height: 0.44rem;
+  margin-left: 0.46rem;
+}
+
+/* ===== Listcard (攻略型结果) ===== */
+.listcard { padding: 0.24rem; }
+.listcard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+  margin-bottom: 0.16rem;
+}
+.listcard-header span { font-size: 0.28rem; color: #50607A; }
+.listcard-header svg { width: 0.28rem; height: 0.28rem; }
+.listcard-title {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.08rem;
+}
+.listcard-desc {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.46rem;
+  margin-bottom: 0.24rem;
+}
+.listcard-desc b {
+  font-size: 0.3rem;
+  display: inline-block;
+  margin-top: 0.04rem;
+}
+.listcard-gradient {
+  position: absolute;
+  top: 0; right: 0;
+  width: 1.56rem;
+  height: 1.69rem;
+  background-image: url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127934472087409/127934472087410/2281a8c8023980ff9dbe90a3229c174c.png);
+  background-size: cover;
+  background-position: center;
+}
+.list-product-card {
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  padding: 0.16rem 0.24rem;
+  margin-bottom: 0.16rem;
+  display: flex;
+  gap: 0.24rem;
+}
+.list-product-img {
+  width: 2.14rem;
+  height: 2.14rem;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.12rem;
+  flex-shrink: 0;
+}
+.list-product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+}
+.list-product-name {
+  font-size: 0.3rem;
+  font-weight: 500;
+  color: #11192D;
+  line-height: 0.45rem;
+  margin-top: 0.04rem;
+  margin-bottom: 0.08rem;
+}
+.list-product-meta {
+  font-size: 0.24rem;
+  color: #50607A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.16rem;
+}
+.list-product-tag {
+  font-size: 0.24rem;
+  color: #FF6200;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.04rem;
+}
+.list-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.list-price {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.04rem;
+}
+.list-price .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.list-price .val {
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.list-price .original {
+  font-size: 0.28rem;
+  color: #7C889C;
+  text-decoration: line-through;
+  margin-left: 0.08rem;
+}
+
+/* ===== Bigcard ===== */
+.bigcard { padding: 0.24rem; }
+.bigcard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+  margin-bottom: 0.16rem;
+}
+.bigcard-header span { font-size: 0.28rem; color: #50607A; }
+.bigcard-header svg { width: 0.28rem; height: 0.28rem; }
+.bigcard-title {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.08rem;
+}
+.bigcard-desc {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.46rem;
+  margin-bottom: 0.24rem;
+}
+.product-cards-scroll {
+  display: flex;
+  gap: 0.16rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -0.24rem;
+  padding: 0 0.24rem;
+}
+.product-cards-scroll::-webkit-scrollbar { display: none; }
+.product-card {
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  padding: 0.24rem;
+  margin-bottom: 0.16rem;
+  width: 5.92rem;
+  flex-shrink: 0;
+}
+.product-image-wrap {
+  position: relative;
+  margin-bottom: 0.12rem;
+}
+.product-image-overlay {
+  position: absolute;
+  bottom: 0.16rem;
+  left: 0.16rem;
+  background: rgba(14, 17, 25, 0.5);
+  border-radius: 0.08rem;
+  padding: 0.06rem 0.12rem;
+  font-size: 0.22rem;
+  color: #FFFFFF;
+}
+.shop-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+  margin-bottom: 0.12rem;
+}
+.shop-name {
+  font-size: 0.3rem;
+  font-weight: 500;
+  color: #11192D;
+  white-space: nowrap;
+}
+.shop-meta {
+  font-size: 0.26rem;
+  color: #50607A;
+  white-space: nowrap;
+}
+.product-image {
+  width: 100%;
+  height: 4.08rem;
+  background-image: url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/e4b133ee9ff9f04420d7c736fc131a86.webp);
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.12rem;
+  margin-bottom: 0.12rem;
+}
+.product-name {
+  font-size: 0.3rem;
+  font-weight: 500;
+  color: #11192D;
+  line-height: 0.45rem;
+  margin-bottom: 0.03rem;
+}
+.product-tag {
+  font-size: 0.24rem;
+  color: #FF6200;
+  margin-top: 0.08rem;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price-current {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.04rem;
+}
+.price-prefix {
+  font-size: 0.26rem;
+  font-weight: 500;
+  color: #FF6200;
+  margin-bottom: 0.04rem;
+  transform: translateY(2px);
+}
+.price-unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.price-value {
+  font-size: 0.4rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+  line-height: 0.42rem;
+}
+.price-original {
+  font-size: 0.28rem;
+  color: #7C889C;
+  text-decoration: line-through;
+  margin-left: 0.08rem;
+  transform: translateY(2px);
+}
+.select-btn {
+  width: 100%;
+  height: 0.8rem;
+  background: #FF6200;
+  border-radius: 0.12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 0.3rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  margin-top: 0.12rem;
+}
+.bigcard-footer {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.5rem;
+  margin-top: 0.16rem;
+}
+.action-bar {
+  display: flex;
+  gap: 0.12rem;
+  margin-top: 0.16rem;
+}
+.action-btn {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+.suggestion-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  margin-top: 0.16rem;
+}
+.suggestion-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0.16rem 0.24rem;
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  font-size: 0.28rem;
+  color: #50607A;
+  cursor: pointer;
+}
+.suggestion-chip svg { width: 0.24rem; height: 0.24rem; }
+
+/* ===== Order Card ===== */
+.order-card { padding: 0.24rem; }
+.order-title {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.08rem;
+}
+.order-desc {
+  font-size: 0.28rem;
+  color: #11192D;
+  line-height: 0.5rem;
+  margin-bottom: 0.16rem;
+}
+.order-summary {
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  padding: 0.16rem 0.24rem;
+  margin-bottom: 0.16rem;
+}
+.order-shop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.08rem 0;
+}
+.order-shop-name {
+  font-size: 0.28rem;
+  color: #11192D;
+}
+.order-shop-meta { font-size: 0.26rem; color: #50607A; }
+.order-item {
+  display: flex;
+  gap: 0.24rem;
+  padding: 0.16rem 0;
+}
+.order-item-img {
+  width: 2.14rem;
+  height: 2.14rem;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.12rem;
+  flex-shrink: 0;
+}
+.order-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.order-item-name {
+  font-size: 0.28rem;
+  font-weight: 500;
+  color: #11192D;
+  line-height: 0.45rem;
+}
+.order-item-tag {
+  display: inline-flex;
+  padding: 0.08rem;
+  background: #F3F6F8;
+  border-radius: 0.08rem;
+  font-size: 0.24rem;
+  color: #50607A;
+  width: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.order-item-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.order-price {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.04rem;
+}
+.order-price .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-price .val {
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-qty {
+  width: 0.48rem;
+  height: 0.48rem;
+  background: #F3F6F8;
+  border-radius: 0.08rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.28rem;
+  color: #11192D;
+}
+.order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem 0;
+  border-top: 0.01rem solid #F3F6F8;
+}
+.order-row-label {
+  font-size: 0.26rem;
+  color: #11192D;
+}
+.order-row-value {
+  font-size: 0.26rem;
+  color: #11192D;
+  display: flex;
+  align-items: center;
+  gap: 0.04rem;
+}
+.order-row-value.muted { color: #7C889C; }
+.order-divider {
+  height: 0.01rem;
+  background: #11192D;
+  opacity: 0.1;
+  margin: 0.08rem 0;
+}
+.order-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.1rem 0;
+}
+.order-discount {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+  font-size: 0.26rem;
+  color: #FF6200;
+  font-weight: 500;
+}
+.order-discount .price {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.02rem;
+}
+.order-discount .price .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-discount .price .val {
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-final {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+}
+.order-final-label {
+  font-size: 0.26rem;
+  color: #11192D;
+  font-weight: 500;
+}
+.order-final .price {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.02rem;
+}
+.order-final .price .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #11192D;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-final .price .val {
+  font-size: 0.4rem;
+  font-weight: 700;
+  color: #11192D;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.order-actions {
+  display: flex;
+  gap: 0.16rem;
+  margin-top: 0.16rem;
+}
+.order-actions button {
+  flex: 1;
+  height: 0.8rem;
+  border-radius: 0.12rem;
+  font-size: 0.3rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+.order-actions .secondary {
+  background: #F3F6F8;
+  color: #50607A;
+}
+.order-actions .primary {
+  background: #FF6200;
+  color: #FFFFFF;
+}
+
+/* ===== Detail Card (订单详情卡) ===== */
+.detail-card { padding: 0.24rem; }
+.detail-title {
+  font-size: 0.32rem;
+  font-weight: 500;
+  color: #11192D;
+  margin-bottom: 0.28rem;
+}
+.detail-summary {
+  border: 0.01rem solid #DADEE2;
+  border-radius: 0.12rem;
+  overflow: hidden;
+}
+.detail-shop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.08rem 0.24rem;
+  margin-top: 0.16rem;
+}
+.detail-shop-left {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+}
+.detail-shop-avatar {
+  width: 0.32rem;
+  height: 0.32rem;
+  background-image: url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/849d8fe5573b8eab222a6616302afe25.webp);
+  background-size: cover;
+  border-radius: 50%;
+}
+.detail-shop-name {
+  font-size: 0.28rem;
+  color: #11192D;
+}
+.detail-shop-meta {
+  font-size: 0.26rem;
+  color: #50607A;
+}
+.detail-item {
+  display: flex;
+  gap: 0.24rem;
+  padding: 0.16rem 0.24rem;
+}
+.detail-item-img {
+  width: 2.14rem;
+  height: 2.14rem;
+  background-image: url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/e4b133ee9ff9f04420d7c736fc131a86.webp);
+  background-size: cover;
+  background-position: center;
+  border-radius: 0.12rem;
+  flex-shrink: 0;
+}
+.detail-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.detail-item-name {
+  font-size: 0.28rem;
+  font-weight: 500;
+  color: #11192D;
+  line-height: 0.45rem;
+}
+.detail-item-tag-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.04rem;
+}
+.detail-item-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.04rem;
+  font-size: 0.24rem;
+  color: #50607A;
+}
+.detail-item-tag svg { width: 0.22rem; height: 0.22rem; }
+.detail-item-price {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.detail-price {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.02rem;
+}
+.detail-price .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-price .val {
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-qty {
+  font-size: 0.28rem;
+  color: #11192D;
+  padding: 0.09rem 0;
+}
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem 0.24rem;
+  border-top: 0.01rem solid #F3F6F8;
+}
+.detail-row-label {
+  font-size: 0.26rem;
+  color: #11192D;
+}
+.detail-row-value {
+  font-size: 0.26rem;
+  color: #11192D;
+}
+.detail-divider {
+  height: 0.01rem;
+  background: #11192D;
+  opacity: 0.1;
+  margin: 0 0.24rem;
+}
+.detail-discount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.24rem 0.24rem 0.03rem;
+}
+.detail-discount {
+  display: flex;
+  align-items: center;
+  gap: 0.04rem;
+  font-size: 0.26rem;
+  color: #FF6200;
+  font-weight: 500;
+}
+.detail-discount .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-discount .val {
+  font-size: 0.36rem;
+  font-weight: 700;
+  color: #FF6200;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-discount-note {
+  font-size: 0.26rem;
+  color: #FF6200;
+}
+.detail-final-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.12rem;
+  padding: 0.03rem 16px 0.08rem;
+  margin-top: -16px;
+  margin-bottom: -10px;
+}
+.detail-final-label {
+  font-size: 0.26rem;
+  color: #11192D;
+  font-weight: 500;
+}
+.detail-final .unit {
+  font-size: 0.3rem;
+  font-weight: 700;
+  color: #11192D;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-final .val {
+  font-size: 0.4rem;
+  font-weight: 700;
+  color: #11192D;
+  font-family: "Alibaba Sans 102", sans-serif;
+}
+.detail-btn-wrap {
+  padding: 0.08rem 0.24rem 1px;
+  margin-bottom: 16px;
+}
+.detail-btn {
+  width: 100%;
+  height: 0.8rem;
+  background: #F3F6F8;
+  border-radius: 0.12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.3rem;
+  font-weight: 500;
+  color: #50607A;
+  border: none;
+  cursor: pointer;
+}
+
+/* ===== Input Bar ===== */
+.input-bar {
+  background: #FFFFFF;
+  padding: 0.18rem 0.24rem 0.56rem;
+  flex-shrink: 0;
+  border-top: 0.01rem solid #F3F6F8;
+}
+.input-toolbar {
+  display: flex;
+  gap: 0.14rem;
+  margin-bottom: 0.18rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.input-toolbar::-webkit-scrollbar { display: none; }
+.toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.08rem;
+  padding: 0.12rem 0.24rem;
+  border: 0.015rem solid rgba(229, 232, 236, 0.8);
+  border-radius: 0.12rem;
+  font-size: 0.26rem;
+  color: #11192D;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.toolbar-item img { width: 0.32rem; height: 0.32rem; }
+.input-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.08rem 0.16rem;
+  border: 0.015rem solid rgba(229, 232, 236, 0.8);
+  border-radius: 0.2rem;
+  height: 0.92rem;
+  cursor: pointer;
+}
+.input-placeholder {
+  font-size: 0.28rem;
+  color: #7C889C;
+}
+.input-hint {
+  text-align: center;
+  font-size: 0.18rem;
+  color: #CACFD7;
+  margin-top: 0.12rem;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(0.2rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.message-row {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Desktop constraint */
+@media (min-width: 480px) {
+  html { font-size: 50px; }
+  body {
+    display: flex;
+    justify-content: center;
+    background: #e5e5e5;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Home View -->
+  <div id="home-view" class="view home-view">
+    <div class="nav-bar">
+      <div class="status-bar"></div>
+      <div class="nav-content">
+        <div class="nav-left" style="pointer-events: none;">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15.5 19.5L8 12L15.5 4.5" stroke="#11192D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-title">闪购千问</span>
+        </div>
+        <div class="nav-right">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 8V12L15 15M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 10.8181 20.7672 9.64778 20.3149 8.55585C19.8626 7.46392 19.1997 6.47177 18.364 5.63604C17.5282 4.80031 16.5361 4.13738 15.4442 3.68508C14.3522 3.23279 13.1819 3 12 3C10.8181 3 9.64778 3.23279 8.55585 3.68508C7.46392 4.13738 6.47177 4.80031 5.63604 5.63604C4.80031 6.47177 4.13738 7.46392 3.68508 8.55585C3.23279 9.64778 3 10.8181 3 12Z" stroke="#11192D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="home-content" id="messages-home"></div>
+    <div class="home-bottom">
+      <div class="home-toolbar">
+        <div class="home-toolbar-item">
+          <img src="https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/9a0401703cc4eeb143c326c81ec72187.png" alt="">
+          <span>找优惠</span>
+        </div>
+        <div class="home-toolbar-item" onclick="openAssistant()">
+          <img src="https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/765a7c750fb55f253a88f4abaaf1896a.png" alt="">
+          <span>送花助手</span>
+        </div>
+        <div class="home-toolbar-item">
+          <img src="https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/ce0797bba5e4269330a08a1815183aa3.png" alt="">
+          <span>周期购</span>
+        </div>
+        <div class="home-toolbar-item">
+          <img src="https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/765a7c750fb55f253a88f4abaaf1896a.png" alt="">
+          <span>多人餐组合</span>
+        </div>
+      </div>
+      <div class="home-input-field" onclick="handleHomeInputClick()">
+        <span class="home-input-placeholder">发消息或按住说话…</span>
+      </div>
+      <div class="home-input-hint">内容由AI生成</div>
+    </div>
+  </div>
+
+  <!-- Assistant View -->
+  <div id="assistant-view" class="view assistant-view">
+    <div class="nav-bar">
+      <div class="status-bar"></div>
+      <div class="nav-content">
+        <div class="nav-left">
+          <div class="nav-icon" onclick="closeAssistant()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15.5 19.5L8 12L15.5 4.5" stroke="#11192D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="nav-title">送花助手</span>
+        </div>
+        <div class="nav-right">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 8V12L15 15M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 10.8181 20.7672 9.64778 20.3149 8.55585C19.8626 7.46392 19.1997 6.47177 18.364 5.63604C17.5282 4.80031 16.5361 4.13738 15.4442 3.68508C14.3522 3.23279 13.1819 3 12 3C10.8181 3 9.64778 3.23279 8.55585 3.68508C7.46392 4.13738 6.47177 4.80031 5.63604 5.63604C4.80031 6.47177 4.13738 7.46392 3.68508 8.55585C3.23279 9.64778 3 10.8181 3 12Z" stroke="#11192D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+      <div id="messages"></div>
+      <div style="height: 0.24rem; flex-shrink: 0;"></div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-toolbar">
+        <div class="toolbar-item" onclick="sendQuick('鲜花')">
+          <span>鲜花</span>
+        </div>
+        <div class="toolbar-item" onclick="sendQuick('送女友的花')">
+          <span>送女友的花</span>
+        </div>
+        <div class="toolbar-item" onclick="sendQuick('玫瑰')">
+          <span>玫瑰</span>
+        </div>
+      </div>
+      <div class="input-field" onclick="handleInputClick()">
+        <span class="input-placeholder">发消息或按住说话…</span>
+      </div>
+      <div class="input-hint">内容由AI生成</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Multi-Surface State =====
+// 首页与送花助手页各自维护独立 state + 消息流，彼此不互通
+function createInitialState() {
+  return {
+    step: 'welcome',
+    query: '',
+    recipient: '',
+    address: '',
+    pendingQuery: '',
+    addressShown: false,
+    selectedProduct: null,
+    blessing: '',
+  };
+}
+
+const surfaces = {
+  home: { state: createInitialState(), messagesElId: 'messages-home' },
+  assistant: { state: createInitialState(), messagesElId: 'messages' },
+};
+let currentSurface = 'home';
+let state = surfaces.home.state;
+
+function switchSurface(name) {
+  currentSurface = name;
+  state = surfaces[name].state;
+  messagesEl = document.getElementById(surfaces[name].messagesElId);
+}
+
+// ===== LLM Config (Optional) =====
+// Fill in your DashScope API key to enable real LLM generation
+const LLM_CONFIG = {
+  apiKey: 'sk-7a5219ecd8094bbe9bfe8aaebd6ea74f',
+  model: 'qwen-turbo',
+  endpoint: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+};
+
+const FLOWER_IMAGES = {
+  flower1: 'images/flower1.png',
+  flower2: 'images/flower2.png',
+  flower3: 'images/flower3.png',
+  flower4: 'images/flower4.png',
+  flower5: 'images/flower5.png',
+  flower6: 'images/flower6.png',
+};
+
+// ===== Product Catalog =====
+const LISTCARD_PRODUCTS = [
+  { img: FLOWER_IMAGES.flower1, name: '草莓杏仁饼干鲜花花束送女友', meta: '小红书趋势 · 29朵 · 玫瑰', tag: '粉嫩嫩豆沙配色温柔到犯规', price: '19.8', original: '58.5' },
+  { img: FLOWER_IMAGES.flower2, name: '弗洛伊德玫瑰混搭花束', meta: '复古调性 · 19朵 · 玫瑰', tag: '高级灰粉复古调性氛围感拉满', price: '28.8', original: '68.5' },
+  { img: FLOWER_IMAGES.flower3, name: '卡布奇诺玫瑰手捧花', meta: '治愈系 · 15朵 · 玫瑰', tag: '低饱和奶咖色系治愈感满满', price: '32.8', original: '78.0' },
+  { img: FLOWER_IMAGES.flower4, name: '芍药绣球混搭花束', meta: '时令新品 · 12朵 · 混搭', tag: '5月时令花材清新又高级', price: '35.8', original: '88.0' },
+  { img: FLOWER_IMAGES.flower5, name: '厄瓜多尔粉玫瑰洋桔梗手捧花', meta: '高端定制 · 21朵 · 混搭', tag: '进口花材粉嫩浪漫仪式感满满', price: '42.8', original: '98.0' },
+  { img: FLOWER_IMAGES.flower6, name: '香槟玫瑰满天星精致花束', meta: '经典款 · 33朵 · 玫瑰', tag: '香槟色系温柔雅致永不出错', price: '38.8', original: '85.0' },
+];
+
+const BIGCARD_PRODUCTS = {
+  big1: { img: FLOWER_IMAGES.flower5, name: '厄瓜多尔粉玫瑰+白色洋桔梗高端手捧花', tag: '当下最流行的低饱和度混搭，适合送女友', price: '368', original: '480' },
+  big2: { img: FLOWER_IMAGES.flower6, name: '香槟玫瑰+满天星精致花束', tag: '花束观感比较温和雅致，适合送女友', price: '328', original: '420' },
+};
+
+// ===== Dynamic Content Engine =====
+const DynamicContent = {
+  // Random pick from array
+  pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  },
+
+  // Build input context
+  getInput() {
+    return {
+      query: state.query || '',
+      recipient: state.recipient || '',
+      occasion: this.detectOccasion(state.query),
+      season: this.detectSeason(),
+      category: this.detectCategory(state.query),
+    };
+  },
+
+  detectOccasion(q) {
+    if (/520|五二零|情人节|七夕/.test(q)) return '520';
+    if (/生日|生辰/.test(q)) return '生日';
+    if (/母亲节|妈妈节/.test(q)) return '母亲节';
+    if (/道歉|对不起|抱歉/.test(q)) return '道歉';
+    if (/日常|随便|悦己|自己/.test(q)) return '日常';
+    return '';
+  },
+
+  detectSeason() {
+    const month = new Date().getMonth() + 1;
+    if (month >= 3 && month <= 5) return '春季';
+    if (month >= 6 && month <= 8) return '夏季';
+    if (month >= 9 && month <= 11) return '秋季';
+    return '冬季';
+  },
+
+  detectCategory(q) {
+    const map = { '玫瑰': '玫瑰', '向日葵': '向日葵', '郁金香': '郁金香', '百合': '百合', '康乃馨': '康乃馨', '芍药': '芍药', '满天星': '满天星' };
+    for (const k in map) if (q.includes(k)) return map[k];
+    return '';
+  },
+
+  // ===== Thinking Generation =====
+  async generateThinking() {
+    const input = this.getInput();
+    const r = input.recipient;
+    const o = input.occasion;
+    const c = input.category;
+    const s = input.season;
+
+    // Try LLM first
+    if (LLM_CONFIG.apiKey) {
+      const systemPrompt = '你是一个鲜花选购专家助手，像易烊千玺一样亲切、专业地帮用户挑花。请根据用户信息生成3段思考文案，每段50-80字，口语化。';
+      const userPrompt = `搜索query: ${input.query}, 收花人: ${input.recipient}, 品类: ${input.category}, 季节: ${input.season}, 场合: ${input.occasion}\n要求以JSON返回: {\"step1\":\"分析用户需求...\", \"step2\":\"买手团经验...\", \"step3\":\"挑选平台商品...\"}`;
+      try {
+        const text = await this.callLLM(systemPrompt, userPrompt);
+        if (text) {
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.step1 && parsed.step2 && parsed.step3) {
+              return { step1: parsed.step1, step2: parsed.step2, step3: parsed.step3 };
+            }
+          }
+        }
+      } catch (e) {
+        console.error('LLM thinking parse failed:', e);
+      }
+    }
+
+    // Fallback template engine
+    // Step 1: 分析用户需求
+    const step1Parts = [];
+    if (r.includes('妈妈') || r.includes('长辈')) {
+      step1Parts.push(this.pick(['用户想给妈妈/长辈选购鲜花', '用户在挑选适合长辈的鲜花礼物']));
+      step1Parts.push(this.pick(['节日即将到来，可能是为了表达感恩和祝福', '想借鲜花传达一份孝心和关怀']));
+      step1Parts.push(this.pick(['长辈一般偏好大气、经典的花束，更注重花材品质', '选择了送到长辈地址，希望稳妥准时送达']));
+    } else if (r.includes('朋友') || r.includes('闺蜜')) {
+      step1Parts.push(this.pick(['用户想给朋友/闺蜜选购鲜花', '用户在挑选适合朋友间赠送的鲜花']));
+      step1Parts.push(this.pick(['可能是聚会、生日或日常惊喜', '想给朋友一个意想不到的惊喜']));
+      step1Parts.push(this.pick(['朋友之间偏好轻松活泼的花束风格，注重创意', '希望花束有设计感，能体现彼此的默契']));
+    } else if (r.includes('自己') || r.includes('居家') || r.includes('悦己')) {
+      step1Parts.push(this.pick(['用户想为自己选购鲜花', '用户在挑选适合居家摆放的鲜花']));
+      step1Parts.push(this.pick(['可能是为了装点居家环境或提升心情', '想要给生活空间增添一些自然气息']));
+      step1Parts.push(this.pick(['个人用花更注重花材新鲜度和性价比', '偏好简约清新的风格，养护方便']));
+    } else {
+      step1Parts.push(this.pick(['用户想给女友选购鲜花', '用户在挑选适合送给恋人的鲜花']));
+      if (o === '520') step1Parts.push(this.pick(['现在距离520节日还有不久，可能是为了庆祝节日并传达爱意', '520快到了，想借鲜花表达心意']));
+      else if (o === '生日') step1Parts.push(this.pick(['可能是为了庆祝生日并且传达爱意', '想给女朋友一个生日惊喜']));
+      else step1Parts.push(this.pick(['可能是为了表达爱意或制造惊喜', '想借鲜花传达一份浪漫心意']));
+      step1Parts.push(this.pick(['选择了非常用的地址，应该是想直接送到对方地址，更注重包装呈现和准时送达', '很在意花束的包装质感和配送时效']));
+    }
+
+    // Step 2: 买手团经验
+    const step2Parts = [];
+    if (r.includes('妈妈') || r.includes('长辈')) {
+      step2Parts.push(this.pick(['长辈送花讲究大气得体，经典康乃馨、百合、向日葵都很受欢迎', '给妈妈送花，经典款永远不会出错']));
+      step2Parts.push(this.pick(['颜色上偏好暖色调，包装要稳重优雅', '暖色系更显温馨，包装不宜过于花哨']));
+      step2Parts.push(this.pick(['注重花语寓意，表达感恩和祝福', '康乃馨象征母爱，百合寓意百年好合']));
+    } else if (r.includes('朋友') || r.includes('闺蜜')) {
+      step2Parts.push(this.pick(['朋友之间送花可以更随意有趣，不必拘泥于传统花语', '闺蜜间送花，有趣比规矩更重要']));
+      step2Parts.push(this.pick(['多巴胺风格、撞色搭配都很适合', '现在流行多巴胺配色，活力满满']));
+      step2Parts.push(this.pick(['注重花束的创意和独特性', '混搭花束更有惊喜感']));
+    } else if (r.includes('自己') || r.includes('居家')) {
+      step2Parts.push(this.pick(['居家鲜花注重花材的持久度和养护便捷性', '自己养花，耐放比惊艳更重要']));
+      step2Parts.push(this.pick(['洋桔梗、小雏菊、康乃馨都是耐养的好选择', '这几种花材养护简单，花期长']));
+      step2Parts.push(this.pick(['颜色可以根据家居风格搭配，简约清新最百搭', '低饱和色系更容易融入家居环境']));
+    } else {
+      if (c === '玫瑰') {
+        step2Parts.push(this.pick(['玫瑰是表达爱意的经典之选，不同颜色有不同寓意', '玫瑰永远不会出错，关键是选对颜色']));
+        step2Parts.push(this.pick(['红玫瑰热烈、粉玫瑰温柔、香槟玫瑰高级', '现在年轻女生偏爱低饱和色的混搭玫瑰']));
+      } else if (c) {
+        step2Parts.push(this.pick([`${c}最近很受欢迎，风格独特又有品位`, `${c}是当前热门花材，颜值和寓意兼具`]));
+        step2Parts.push(this.pick(['搭配得当可以做出非常有高级感的花束', '混搭一些配花会让整体更有层次']));
+      } else {
+        step2Parts.push(this.pick(['送女友的花一定要有创意和惊喜', '女生收花最在意的是用心和仪式感']));
+        step2Parts.push(this.pick(['花的搭配、包装、色系都很重要', '现在流行风格清晰、低饱和色的花束']));
+      }
+      step2Parts.push(this.pick(['玫瑰和混合花束是首选，因为花语是传达爱意', '包装精致度直接影响收花人的第一印象']));
+    }
+
+    // Step 3: 挑选平台商品
+    const step3Parts = [];
+    if (r.includes('妈妈') || r.includes('长辈')) {
+      step3Parts.push(this.pick(['正在挑选适合长辈的经典花束', '正在筛选寓意吉祥、大气的花束']));
+      step3Parts.push(this.pick(['以康乃馨、百合、向日葵为主', '优选暖色调、花材饱满的组合']));
+      step3Parts.push(this.pick(['筛选有祝福卡片的商品，方便写上感恩话语', '优先选择配送稳妥、包装得体的店铺']));
+    } else if (r.includes('朋友') || r.includes('闺蜜')) {
+      step3Parts.push(this.pick(['正在挑选有趣创意的花束', '正在筛选适合朋友间赠送的个性花束']));
+      step3Parts.push(this.pick(['以混合花束、多巴胺配色、小众花材为主', '优选色彩明快、有设计感的款式']));
+      step3Parts.push(this.pick(['筛选带有趣味贺卡服务的商品', '优先选择30分钟内可送达的店铺']));
+    } else if (r.includes('自己') || r.includes('居家')) {
+      step3Parts.push(this.pick(['正在挑选适合居家的鲜花', '正在筛选花期长、养护简单的花材']));
+      step3Parts.push(this.pick(['以洋桔梗、小雏菊、康乃馨等耐养花材为主', '优选性价比高的鲜切花组合']));
+      step3Parts.push(this.pick(['筛选养护说明详细的商品', '优先选择同城花店，确保花材新鲜']));
+    } else {
+      step3Parts.push(this.pick(['正在挑选附近鲜花花束', '正在筛选适合送女友的高品质花束']));
+      if (c) step3Parts.push(this.pick([`以${c}为主，搭配当季配花`, `重点挑选${c}相关的精致款式`]));
+      else step3Parts.push(this.pick(['以玫瑰、混合花束、芍药等为主', '优选低饱和色、风格清新的款式']));
+      if (s === '春季') step3Parts.push(this.pick(['春季郁金香、洋牡丹正值花期，我会留意', '春天花材丰富，优先选当季新鲜花材']));
+      else if (s === '夏季') step3Parts.push(this.pick(['夏季绣球、向日葵正当季，我会留意', '夏天选耐放花材，注意保鲜']));
+      else step3Parts.push(this.pick(['我会留意平台当季新品', '优先筛选时令花材，保证新鲜度']));
+      step3Parts.push(this.pick(['筛选30分钟内可送达的、有贺卡服务的商品', '优先选择评分高、包装精美的店铺']));
+    }
+
+    return {
+      step1: step1Parts.join('。') + '。',
+      step2: step2Parts.join('。') + '。',
+      step3: step3Parts.join('。') + '。',
+    };
+  },
+
+  // ===== Listcard Sections Generation =====
+  async generateListcardSections() {
+    const input = this.getInput();
+    const r = input.recipient;
+    const o = input.occasion;
+    const c = input.category;
+    const s = input.season;
+
+    // Try LLM first
+    if (LLM_CONFIG.apiKey) {
+      const systemPrompt = '你是一个鲜花选购专家助手，像易烊千玺一样亲切、专业地帮用户挑花。请生成2-3个花束推荐板块的标题和描述，每个板块包含icon（emoji）、title（标题）、desc（描述，80-120字，口语化）。';
+      const userPrompt = `搜索query: ${input.query}, 收花人: ${input.recipient}, 品类: ${input.category}, 季节: ${input.season}, 场合: ${input.occasion}\n要求以JSON数组返回，例如: [{\"icon\":\"🔥\",\"title\":\"小红书爆款\",\"desc\":\"...\"},{\"icon\":\"📈\",\"title\":\"时令新品\",\"desc\":\"...\"}]`;
+      try {
+        const text = await this.callLLM(systemPrompt, userPrompt);
+        if (text) {
+          const jsonMatch = text.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].icon && parsed[0].title && parsed[0].desc) {
+              return parsed.slice(0, 3);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('LLM listcard parse failed:', e);
+      }
+    }
+
+    // Fallback template engine
+    const sections = [];
+
+    // Pool of available sections
+    const pool = [
+      {
+        id: 'trending',
+        icon: '🔥',
+        title: '小红书爆款',
+        desc: () => {
+          if (r.includes('妈妈') || r.includes('长辈')) return '最近小红书很多博主在晒送妈妈的花束，暖色调经典款最受欢迎。康乃馨混搭百合既大气又有心意，我为你挑选了几款高赞同款~';
+          if (r.includes('朋友') || r.includes('闺蜜')) return '小红书上闺蜜互送的花束越来越有趣了，多巴胺配色、撞色混搭都很火。轻松活泼的风格最适合朋友间的心意表达~';
+          if (r.includes('自己')) return '小红书居家鲜花话题很火，简约清新的小众花束最受独居女生欢迎。低维护、高颜值是关键，这几款很适合放在书桌或床头~';
+          return '根据小红书热门讨论，女生比较喜欢风格清新、低饱和色的花束，更有少女感~我为你推荐这几款';
+        },
+      },
+      {
+        id: 'seasonal',
+        icon: '📈',
+        title: '时令新品',
+        desc: () => {
+          if (s === '春季') return '春天正是花材最丰富的季节，郁金香、洋牡丹、樱花枝都上市了。我为你挑选了这几款春季限定花束，新鲜度满分~';
+          if (s === '夏季') return '夏季绣球、向日葵、荷花正当季，花材饱满又耐放。我为你筛选了几款夏日清新风格的花束，送给重要的人再合适不过~';
+          if (r.includes('妈妈')) return '5月正是芍药和康乃馨的盛花期，花头大、颜色正。我为你推荐这几款适合送妈妈的时令花束，寓意吉祥又新鲜~';
+          return '根据平台当季新品，我为你推荐这几款适合送女友的花。5月最新上市的芍药、绣球等花材~';
+        },
+      },
+      {
+        id: 'nearby',
+        icon: '⚡',
+        title: '附近热卖',
+        desc: () => {
+          if (o === '520') return '附近这几家花店正在热卖520主题花束，配送快、包装精美，很多男生今天都在下单~';
+          if (o === '生日') return '附近花店生日花束订单火爆，这几款备货充足、配送有保障，今天下单还能准时送到~';
+          return '附近人气花店这几款花束最近销量很高，配送快、包装精致，很多用户好评回购~';
+        },
+      },
+      {
+        id: 'value',
+        icon: '💰',
+        title: '性价比之选',
+        desc: () => {
+          if (r.includes('自己')) return '自己买花不用太奢侈，这几款鲜切花组合价格亲民但颜值在线，养护简单，适合长期复购~';
+          return '这几款花束价格友好但包装不输高端款，花材新鲜、搭配有层次感，适合想要体面又控制预算的你~';
+        },
+      },
+      {
+        id: 'aesthetic',
+        icon: '📸',
+        title: '出片高颜值',
+        desc: () => {
+          if (r.includes('朋友') || r.includes('闺蜜')) return '想要拍照发朋友圈选这几款，色彩明快、花型饱满，自然光下特别上镜，闺蜜合照氛围感拉满~';
+          return '这几款花束配色高级、花型饱满，自然光下特别上镜。收到后随手一拍就是朋友圈高赞大片~';
+        },
+      },
+      {
+        id: 'express',
+        icon: '🚚',
+        title: '极速达',
+        desc: () => '这几家店铺支持30分钟极速配送，花材都是店内现货，包装完毕就能送出。急单首选，不耽误重要时刻~',
+      },
+      {
+        id: 'category',
+        icon: c === '玫瑰' ? '🌹' : c === '向日葵' ? '🌻' : c === '郁金香' ? '🌷' : '🌸',
+        title: c ? `${c}精选` : '花材精选',
+        desc: () => {
+          if (c === '玫瑰') return '玫瑰专区精选了厄瓜多尔、肯尼亚等进口玫瑰，花头大、花瓣厚实。从经典红玫瑰到小众奥斯汀，各种风格都有~';
+          if (c === '向日葵') return '向日葵象征着阳光和希望，花束明快治愈。这几款搭配了尤加利叶和雏菊，层次丰富，送给重要的人很有分量~';
+          if (c === '郁金香') return '郁金香优雅高级，是春季限定的浪漫。从经典单色到渐变混搭，这几款都是店内人气款，花茎挺拔、花期长~';
+          return '精选当季优质花材，花茎挺拔、花苞饱满。从经典款到小众品种，满足不同喜好和预算~';
+        },
+      },
+    ];
+
+    // Select relevant sections
+    sections.push(pool[0]); // 小红书爆款 always first
+    sections.push(pool[1]); // 时令新品 always second
+
+    if (o === '520' || o === '生日') sections.push(pool[2]); // 附近热卖 for urgent occasions
+    if (c) sections.push(pool[6]); // category section if category specified
+    else if (!r.includes('妈妈') && !r.includes('长辈')) sections.push(pool[3]); // 性价比之选 for non-elderly
+
+    // Ensure unique emojis
+    const usedEmojis = new Set();
+    return sections.filter(sec => {
+      if (usedEmojis.has(sec.icon)) return false;
+      usedEmojis.add(sec.icon);
+      return true;
+    }).map(sec => ({
+      icon: sec.icon,
+      title: sec.title,
+      desc: typeof sec.desc === 'function' ? sec.desc() : sec.desc,
+    }));
+  },
+
+  // ===== Bigcard Desc Generation =====
+  async generateBigcardDesc() {
+    const input = this.getInput();
+    const r = input.recipient;
+    const c = input.category;
+    const o = input.occasion;
+
+    // Try LLM first
+    if (LLM_CONFIG.apiKey) {
+      const systemPrompt = '你是一个鲜花选购专家助手，像易烊千玺一样亲切、专业地帮用户挑花。请根据用户信息生成2段描述文案，口语化。';
+      const userPrompt = `搜索query: ${input.query}, 收花人: ${input.recipient}, 品类: ${input.category}, 季节: ${input.season}, 场合: ${input.occasion}\n要求以JSON返回: {\"desc1\":\"第一段推荐文案（100-150字）...\", \"desc2\":\"第二段花语/攻略文案（可带<br>换行）...\"}`;
+      try {
+        const text = await this.callLLM(systemPrompt, userPrompt);
+        if (text) {
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.desc1 && parsed.desc2) {
+              return { desc1: parsed.desc1, desc2: parsed.desc2 };
+            }
+          }
+        }
+      } catch (e) {
+        console.error('LLM bigcard parse failed:', e);
+      }
+    }
+
+    // Fallback template engine
+    let desc1 = '';
+    let desc2 = '';
+
+    if (c === '玫瑰') {
+      desc1 = this.pick([
+        '最近小红书讨论度高的是厄瓜多尔玫瑰，低饱和度混搭玫瑰花束，风格清晰，颜值出众，适合送女友，也适合送闺蜜，附近这几家店正在热卖~',
+        '玫瑰是永不过时的浪漫之选。最近低饱和色的混搭玫瑰特别受欢迎，既有高级感又不失温柔，送恋人非常得体~',
+      ]);
+      desc2 = '不同颜色的玫瑰有不同的寓意哦~<br>红玫瑰：经典热烈，送恋人不会出错<br>粉玫瑰：温柔甜美，适合表白或日常惊喜<br>香槟玫瑰：高级低调，适合纪念日';
+    } else if (c === '向日葵') {
+      desc1 = this.pick([
+        '向日葵代表着阳光和希望，最近很受年轻人欢迎。明亮大气的花束风格，送给朋友或恋人都很治愈~',
+        '夏天正是向日葵的季节，花盘饱满、颜色明艳。搭配尤加利叶和小雏菊，既有层次感又很上镜~',
+      ]);
+      desc2 = '向日葵的花语是「沉默的爱」和「忠诚」，适合表达坚定的感情。<br>单支向日葵简约大方，混搭花束更有仪式感。<br>送给朋友表示鼓励和祝福，送给恋人则代表专一和守护。';
+    } else if (c === '郁金香') {
+      desc1 = this.pick([
+        '郁金香优雅高贵，是春季最浪漫的花材之一。花茎挺拔、花瓣饱满，单插或混搭都很有格调~',
+        '最近ins风郁金香花束很火，低饱和配色、简约包装，送给注重生活质感的女生再合适不过~',
+      ]);
+      desc2 = '郁金香不同颜色寓意不同~<br>红色郁金香：热烈的爱意告白<br>粉色郁金香：温柔的幸福和浪漫<br>紫色郁金香：高贵神秘，适合纪念日<br>白色郁金香：纯洁无瑕，适合表白';
+    } else if (r.includes('妈妈') || r.includes('长辈')) {
+      desc1 = this.pick([
+        '送妈妈的花讲究温馨大气，经典款永远不会出错。康乃馨、百合、向日葵都是妈妈们的最爱，花语吉祥又体面~',
+        '长辈收花更看重寓意和品质，而不是花哨的包装。这几款经典花束花材饱满、配色稳重，送给妈妈或长辈都很得体~',
+      ]);
+      desc2 = '送长辈的花材选择有讲究~<br>康乃馨：象征母爱和感恩，母亲节首选<br>百合：寓意百年好合、百事合意<br>向日葵：代表阳光和尊敬，适合送给长辈<br>避免纯白色花束（传统忌讳）和过于浓烈的香味花材';
+    } else if (r.includes('朋友') || r.includes('闺蜜')) {
+      desc1 = this.pick([
+        '朋友之间送花可以更随性有趣，不必拘泥于传统。多巴胺配色、混搭花束都很适合，关键是让对方感受到你的用心~',
+        '闺蜜互送的花束越来越有创意了，撞色搭配、小众花材、趣味包装都很受欢迎。这几款风格活泼，朋友收到一定会惊喜~',
+      ]);
+      desc2 = '朋友送花的小建议~<br>颜色可以更明快大胆，黄色、橙色、紫色混搭都很有趣<br>不必太在意花语，好玩和好看更重要<br>可以搭配一张手写卡片，写上你们的专属梗或回忆<br>包装风格轻松活泼，避免过于正式';
+    } else if (r.includes('自己') || r.includes('居家')) {
+      desc1 = this.pick([
+        '居家鲜花不需要太隆重，清新自然就好。这几款花束养护简单、花期长，放在书桌或窗边，每天看到心情都会变好~',
+        '为自己买花是一种生活态度。简约清新的花束最百搭，不挑家居风格，随手一插就很有氛围感~',
+      ]);
+      desc2 = '居家养花小贴士~<br>洋桔梗、康乃馨、小雏菊都很耐养，花期7-10天<br>记得每天换水、斜剪花茎，远离阳光直射和水果<br>花瓶不用太复杂，透明玻璃瓶最百搭<br>可以搭配尤加利叶或蕨类，增加绿意和层次';
+    } else {
+      desc1 = this.pick([
+        '最近小红书讨论度高的是厄瓜多尔玫瑰，低饱和度混搭玫瑰花束，风格清晰，颜值出众，适合送女友，也适合送闺蜜，附近这几家店正在热卖~',
+        '送女友的花，最重要的是让她感受到你的用心。这几款花束从花材选择到包装设计都很讲究，收到后仪式感满满~',
+      ]);
+      if (o === '520') {
+        desc2 = '520送花攻略~<br>红玫瑰：经典热烈，表达浓烈爱意<br>粉玫瑰：温柔甜美，适合表白或日常惊喜<br>香槟玫瑰：高级低调，适合纪念日<br>混搭花束：更有层次感和惊喜，推荐低饱和配色';
+      } else {
+        desc2 = '不同花材的送花指南~<br>玫瑰：表达爱意首选，不同颜色有不同寓意<br>芍药：5月限定，花语是「害羞和思念」<br>郁金香：优雅高级，适合有品位的女生<br>满天星：配角之王，搭配任何花材都加分';
+      }
+    }
+
+    return { desc1, desc2 };
+  },
+
+  // ===== LLM API Call (Optional) =====
+  async callLLM(systemPrompt, userPrompt) {
+    if (!LLM_CONFIG.apiKey) return null;
+    try {
+      const res = await fetch(LLM_CONFIG.endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LLM_CONFIG.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: LLM_CONFIG.model,
+          input: {
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+          },
+        }),
+      });
+      const data = await res.json();
+      return data.output?.text || data.output?.choices?.[0]?.message?.content || null;
+    } catch (e) {
+      console.error('LLM call failed:', e);
+      return null;
+    }
+  },
+};
+
+const homeView = document.getElementById('home-view');
+const assistantView = document.getElementById('assistant-view');
+const chatArea = document.getElementById('chatArea');
+let messagesEl = document.getElementById(surfaces[currentSurface].messagesElId);
+
+// 把某元素顶部对齐到聊天区顶部：只改 chatArea.scrollTop，不用 scrollIntoView，
+// 避免在 iframe 内嵌时连带滚动父页面(index.html)导致窜动。
+function scrollRowToTop(el) {
+  if (!el || !chatArea) return;
+  chatArea.scrollTop += el.getBoundingClientRect().top - chatArea.getBoundingClientRect().top;
+}
+
+function createRow(className, innerHTML) {
+  const row = document.createElement('div');
+  row.className = 'message-row ' + className;
+  row.innerHTML = innerHTML;
+  messagesEl.appendChild(row);
+  // 第一条不滚（避免预渲染 welcome 时把 off-screen 容器拽进视窗）
+  if (messagesEl.children.length > 1) {
+    requestAnimationFrame(() => {
+      scrollRowToTop(row);
+    });
+  }
+  return row;
+}
+
+function addUserBubble(text) {
+  createRow('user', `<div class="user-bubble">${escapeHtml(text)}</div>`);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== View Switching =====
+function openAssistant() {
+  switchSurface('assistant');
+  // 先让 assistant-view 可见但仍处 translateX(100%)，注入 welcome 到 off-screen 容器
+  assistantView.classList.add('opening');
+  if (messagesEl.children.length === 0) {
+    showWelcome();
+  }
+  // 双 rAF：第 1 帧让浏览器把 off-screen 的 welcome 完成 layout+paint；
+  // 第 2 帧再切 .active 触发 transform 过渡 —— 杜绝 welcome 在首页位置闪一帧
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      homeView.classList.add('behind');
+      assistantView.classList.add('active');
+      assistantView.classList.remove('opening');
+    });
+  });
+}
+
+function closeAssistant() {
+  assistantView.classList.remove('active');
+  homeView.classList.remove('behind');
+  // 等过渡结束再切回首页 state，保持滑动期间助手页 UI 不被首页 state 改写
+  setTimeout(() => switchSurface('home'), 320);
+}
+
+// ===== Welcome Card =====
+function showWelcome() {
+  const html = `
+    <div class="assistant-card welcome-card">
+      <div class="welcome-header">
+        <div>
+          <div class="welcome-badge">AI帮你挑</div>
+          <div class="welcome-title">🌷闪购送花助手</div>
+          <div class="welcome-subtitle">我会基于你的场景帮你挑选最适合的花</div>
+        </div>
+      </div>
+      <div class="scenario-list">
+        <div class="scenario-item" onclick="selectScenario('🌹送伴侣的花')">
+          <div class="scenario-title">🌹送伴侣的花</div>
+          <div class="scenario-desc">根据关系阶段和送花理由给你丰富的选花攻略</div>
+        </div>
+        <div class="scenario-item" onclick="selectScenario('🌻居家悦己鲜花')">
+          <div class="scenario-title">🌻居家悦己鲜花</div>
+          <div class="scenario-desc">根据你的品类偏好和布置要求挑选当季鲜花</div>
+        </div>
+        <div class="scenario-item" onclick="selectScenario('🪻好友见面花束')">
+          <div class="scenario-title">🪻好友见面花束</div>
+          <div class="scenario-desc">根据送花场景和好友关系挑选不同风格鲜花</div>
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Address Card =====
+function showAddressCard() {
+  const html = `
+    <div class="assistant-card address-card">
+      <div class="address-text">请问您要把鲜花送到哪里？为确保推荐的鲜花款式及配送范围精准，请先确认或输入收礼人的收货地址，我们将据此推荐附近最快送达的花店：</div>
+      <div class="address-current">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0FAD50" stroke-width="2"/><path d="M8 12L11 15L16 9" stroke="#0FAD50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>(当前位置) 西溪湿地地铁站A口</span>
+      </div>
+      <div class="address-actions">
+        <button class="address-btn secondary" onclick="changeAddress()">更换其他位置</button>
+        <button class="address-btn primary" onclick="confirmAddress()">确认地址</button>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Clarify Card =====
+function showClarifyCard() {
+  const html = `
+    <div class="assistant-card clarify-card">
+      <div class="clarify-header">
+        <span>已完成分析</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="#50607A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="clarify-desc">先了解一些基础信息，这样我会推荐的更准确~</div>
+      <div class="clarify-question">这束鲜花想送给谁？</div>
+      <div class="clarify-options">
+        <div class="clarify-option" onclick="selectRecipient('❤️ 送女朋友')">
+          <div class="option-checkbox"></div>
+          <span class="option-text">❤️ 送女朋友</span>
+        </div>
+        <div class="clarify-option" onclick="selectRecipient('👩🏻 送妈妈/长辈')">
+          <div class="option-checkbox"></div>
+          <span class="option-text">👩🏻 送妈妈/长辈</span>
+        </div>
+        <div class="clarify-option" onclick="selectRecipient('🎀 送朋友/闺蜜')">
+          <div class="option-checkbox"></div>
+          <span class="option-text">🎀 送朋友/闺蜜</span>
+        </div>
+        <div class="clarify-option" onclick="selectRecipient('👀 自己欣赏')">
+          <div class="option-checkbox"></div>
+          <span class="option-text">👀 自己欣赏</span>
+        </div>
+        <div class="clarify-option" onclick="selectRecipient('其他')">
+          <div class="option-checkbox"></div>
+          <span class="option-text">其他</span>
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Thinking Card =====
+async function showThinkingCard() {
+  const thinking = await DynamicContent.generateThinking();
+  const html = `
+    <div class="assistant-card thinking-card">
+      <div class="thinking-steps-container">
+        <div class="thinking-step-group" data-step="1">
+          <div class="thinking-step">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0FAD50" stroke-width="2"/><path d="M8 12L11 15L16 9" stroke="#0FAD50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="thinking-step-title">正在分析用户需求</div>
+          </div>
+          <div class="thinking-step-desc">${thinking.step1}</div>
+        </div>
+        <div class="thinking-step-group" data-step="2">
+          <div class="thinking-step">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0FAD50" stroke-width="2"/><path d="M8 12L11 15L16 9" stroke="#0FAD50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="thinking-step-title">正在查询买手团经验</div>
+          </div>
+          <div class="thinking-step-desc">${thinking.step2}</div>
+        </div>
+        <div class="thinking-step-group" data-step="3">
+          <div class="thinking-step">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0FAD50" stroke-width="2"/><path d="M8 12L11 15L16 9" stroke="#0FAD50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="thinking-step-title">正在挑选平台商品</div>
+          </div>
+          <div class="thinking-step-desc">${thinking.step3}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+
+  const allGroups = document.querySelectorAll('.thinking-step-group');
+  const g1 = allGroups[allGroups.length - 3];
+  const g2 = allGroups[allGroups.length - 2];
+  const g3 = allGroups[allGroups.length - 1];
+
+  // Dynamic height: measure tallest step group
+  const container = g1.parentElement;
+  let maxH = 0;
+  [g1, g2, g3].forEach(g => {
+    const h = g.getBoundingClientRect().height;
+    if (h > maxH) maxH = h;
+  });
+  if (maxH > 0 && container) {
+    container.style.height = maxH + 'px';
+  }
+
+  setTimeout(() => { g1.classList.add('visible'); scrollRowToTop(g1); }, 200);
+  setTimeout(() => { g1.classList.remove('visible'); g2.classList.add('visible'); scrollRowToTop(g2); }, 1400);
+  setTimeout(() => { g2.classList.remove('visible'); g3.classList.add('visible'); scrollRowToTop(g3); }, 2600);
+
+  setTimeout(() => {
+    if (state.query && isCategoryQuery(state.query)) {
+      (async () => { await showBigcard(); })();
+    } else {
+      (async () => { await showListcard(); })();
+    }
+  }, 4000);
+}
+
+// ===== Listcard (攻略型结果) =====
+async function showListcard() {
+  const sections = await DynamicContent.generateListcardSections();
+  let sectionsHtml = '';
+  const products = LISTCARD_PRODUCTS;
+
+  sections.forEach((sec, idx) => {
+    sectionsHtml += `<div class="listcard-desc"><b>${sec.icon} ${sec.title}</b><br>${sec.desc}</div>`;
+    const startIdx = idx * 2;
+    for (let i = startIdx; i < startIdx + 2 && i < products.length; i++) {
+      const p = products[i];
+      sectionsHtml += `
+        <div class="list-product-card" onclick="selectProductFromList(${i})">
+          <div class="list-product-img" style="background-image:url(${p.img})"></div>
+          <div class="list-product-info">
+            <div>
+              <div class="list-product-name">${p.name}</div>
+              <div class="list-product-meta">${p.meta}</div>
+              <div class="list-product-tag">${p.tag}</div>
+            </div>
+            <div class="list-price-row">
+              <div class="list-price">
+                <span class="unit">¥</span>
+                <span class="val">${p.price}</span>
+                <span class="original">¥${p.original}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  const html = `
+    <div class="assistant-card listcard">
+      <div class="listcard-header">
+        <span>已完成分析</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="#50607A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      ${sectionsHtml}
+      <div class="suggestion-chips">
+        <div class="suggestion-chip" onclick="sendQuick('给我推荐多巴胺风格的鲜花')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          给我推荐多巴胺风格的鲜花
+        </div>
+        <div class="suggestion-chip" onclick="sendQuick('看看大家都在买什么')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          看看大家都在买什么
+        </div>
+        <div class="suggestion-chip" onclick="sendQuick('推荐一些高性价比款')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          推荐一些高性价比款
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Bigcard =====
+async function showBigcard() {
+  const bigcardDesc = await DynamicContent.generateBigcardDesc();
+  const big1 = BIGCARD_PRODUCTS.big1;
+  const big2 = BIGCARD_PRODUCTS.big2;
+  const html = `
+    <div class="assistant-card bigcard">
+      <div class="bigcard-header">
+        <span>已完成分析</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="#50607A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="bigcard-desc">${bigcardDesc.desc1}</div>
+      <div class="product-cards-scroll">
+        <div class="product-card">
+          <div class="shop-header">
+            <span class="shop-name">MeetYou 遇见你花艺工作室</span>
+            <span class="shop-meta">4.9分 月售600+ 起送¥120 60分钟 1.8km</span>
+          </div>
+          <div class="product-image-wrap">
+            <div class="product-image" style="background-image:url(${big1.img})"></div>
+          </div>
+          <div class="product-name">${big1.name}</div>
+          <div class="product-tag">${big1.tag}</div>
+          <div class="price-row">
+            <div class="price-current">
+              <span class="price-prefix">券后约</span>
+              <span class="price-unit">¥</span>
+              <span class="price-value">${big1.price}</span>
+              <span class="price-original">¥${big1.original}</span>
+            </div>
+          </div>
+          <button class="select-btn" onclick="selectProduct('big1')">选好了</button>
+        </div>
+        <div class="product-card">
+          <div class="shop-header">
+            <span class="shop-name">MeetYou 遇见你花艺工作室</span>
+            <span class="shop-meta">4.9分 月售600+ 起送¥120 60分钟 1.8km</span>
+          </div>
+          <div class="product-image-wrap">
+            <div class="product-image" style="background-image:url(${big2.img})"></div>
+            <div class="product-image-overlay">手写贺卡; 精美礼袋包装</div>
+          </div>
+          <div class="product-name">${big2.name}</div>
+          <div class="product-tag">${big2.tag}</div>
+          <div class="price-row">
+            <div class="price-current">
+              <span class="price-prefix">券后约</span>
+              <span class="price-unit">¥</span>
+              <span class="price-value">${big2.price}</span>
+              <span class="price-original">¥${big2.original}</span>
+            </div>
+          </div>
+          <button class="select-btn" onclick="selectProduct('big2')">选好了</button>
+        </div>
+      </div>
+      <div class="bigcard-desc">${bigcardDesc.desc2}</div>
+      <div class="suggestion-chips">
+        <div class="suggestion-chip" onclick="sendQuick('我想要红玫瑰')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          我想要红玫瑰
+        </div>
+        <div class="suggestion-chip" onclick="sendQuick('推荐一些高性价比款')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          推荐一些高性价比款
+        </div>
+        <div class="suggestion-chip" onclick="sendQuick('除了玫瑰还有什么适合送女友')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          除了玫瑰还有什么适合送女友
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Order Card =====
+function showOrderCard() {
+  state.blessing = '';
+  const product = state.selectedProduct || BIGCARD_PRODUCTS.big1;
+  const html = `
+    <div class="assistant-card order-card">
+      <div class="order-title">加购成功！</div>
+      <div class="order-desc">所有商品都准备好了！确认地址没问题，就可以付款了～</div>
+      <div class="order-summary">
+        <div class="order-shop">
+          <div style="display:flex;align-items:center;gap:0.08rem">
+            <div style="width:0.32rem;height:0.32rem;background-image:url(https://mastergo-default.oss-cn-hangzhou.aliyuncs.com/127231384010781/183107002341513/849d8fe5573b8eab222a6616302afe25.webp);background-size:cover;border-radius:50%"></div>
+            <span class="order-shop-name">MeetYou 遇见你花艺工作室</span>
+          </div>
+          <span class="order-shop-meta">60分钟 1.8km</span>
+        </div>
+        <div class="order-item">
+          <div class="order-item-img" style="background-image:url(${product.img})"></div>
+          <div class="order-item-info">
+            <div class="order-item-name">${product.name}</div>
+            <div class="order-item-tag">手写贺卡; 精美礼袋包装</div>
+            <div class="order-item-price">
+              <div class="order-price">
+                <span class="unit">¥</span>
+                <span class="val">480</span>
+              </div>
+              <div class="order-qty">x1</div>
+            </div>
+          </div>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">配送至</span>
+          <span class="order-row-value">阿里巴巴西溪区6号楼小邮局</span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">送达时间</span>
+          <span class="order-row-value">立即送出 | 预计15:30-16:00送达</span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">祝福语</span>
+          <span class="order-row-value ${state.blessing ? '' : 'muted'}" id="order-blessing">${state.blessing || '祝福语 >'}</span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">备注</span>
+          <span class="order-row-value muted">可提出菜品、餐具、配送需求 ></span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">支付方式</span>
+          <span class="order-row-value">花呗 支付宝 ></span>
+        </div>
+        <div class="order-divider"></div>
+        <div class="order-total">
+          <div class="order-discount">
+            <span style="transform: translateY(2px); display: inline-block;">已优惠</span>
+            <div class="price">
+              <span class="unit">¥</span>
+              <span class="val">112</span>
+            </div>
+            <span style="transform: translateY(2px); display: inline-block;">（超级吃货卡¥12）</span>
+          </div>
+          <div class="order-final">
+            <span class="order-final-label" style="transform: translateY(2px); display: inline-block;">小计</span>
+            <div class="price">
+              <span class="unit">¥</span>
+              <span class="val">380</span>
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <button class="secondary" onclick="addMore()">进店加购</button>
+          <button class="primary" onclick="payNow()">立即支付</button>
+        </div>
+      </div>
+      <div class="suggestion-chips">
+        <div class="suggestion-chip" onclick="sendQuick('加个祝福语，祝你每天都像今天一样开心')">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+          加个祝福语，"祝你每天都像今天一样开心"
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Detail Card (订单详情卡) =====
+function showDetailCard() {
+  const product = state.selectedProduct || BIGCARD_PRODUCTS.big1;
+  const html = `
+    <div class="assistant-card detail-card">
+      <div class="detail-title">已经下单成功，预计15:00-16:00送达</div>
+      <div class="detail-summary">
+        <div class="detail-shop">
+          <div class="detail-shop-left">
+            <div class="detail-shop-avatar"></div>
+            <span class="detail-shop-name">MeetYou 遇见你花艺工作室</span>
+          </div>
+          <span class="detail-shop-meta">60分钟 1.8km</span>
+        </div>
+        <div class="detail-item">
+          <div class="detail-item-img" style="background-image:url(${product.img})"></div>
+          <div class="detail-item-info">
+            <div class="detail-item-name">${product.name}</div>
+            <div class="detail-item-tag-wrap">
+              <span class="detail-item-tag">手写贺卡</span>
+              <span class="detail-item-tag" style="margin-left:0.08rem">精美礼袋包装</span>
+              <svg viewBox="0 0 24 24" fill="none" style="width:0.22rem;height:0.22rem;margin-left:0.08rem"><path d="M12 5V19M5 12H19" stroke="#50607A" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="detail-item-price">
+              <div class="detail-price">
+                <span class="unit">¥</span>
+                <span class="val">480</span>
+              </div>
+              <span class="detail-qty">x1</span>
+            </div>
+          </div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">配送至</span>
+          <span class="detail-row-value">阿里巴巴西溪区6号楼小邮局</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">送达时间</span>
+          <span class="detail-row-value">立即送出 | 预计15:30-16:00送达</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row-label">祝福语</span>
+          <span class="detail-row-value" id="detail-blessing">${state.blessing || '祝你每天都像今天一样开心'}</span>
+        </div>
+        <div class="detail-divider"></div>
+        <div class="detail-discount-row">
+          <div class="detail-discount">
+            已优惠
+            <span class="unit">¥</span>
+            <span class="val">112</span>
+          </div>
+          <span class="detail-discount-note">（超级吃货卡¥12）</span>
+        </div>
+        <div class="detail-final-row">
+          <span class="detail-final-label">小计</span>
+          <div class="detail-final">
+            <span class="unit">¥</span>
+            <span class="val">380</span>
+          </div>
+        </div>
+        <div class="detail-btn-wrap">
+          <button class="detail-btn">订单详情</button>
+        </div>
+      </div>
+    </div>
+  `;
+  createRow('assistant', html);
+}
+
+// ===== Query Classification =====
+function isVagueQuery(text) {
+  const t = text.trim();
+  // 只要有场景信息就不算模糊query
+  if (/送女友|送妈妈|送长辈|送朋友|送闺蜜|自己欣赏|送伴侣|居家|悦己|好友|见面/.test(t)) return false;
+  // 只要有品类信息就不算模糊query
+  if (/玫瑰|向日葵|郁金香|牡丹|康乃馨|百合|满天星/.test(t)) return false;
+  // 只有包含核心模糊意图词才算模糊
+  return /鲜花|买花|送花/.test(t);
+}
+
+function isCategoryQuery(text) {
+  return /(玫瑰|向日葵|郁金香|牡丹|康乃馨|百合|满天星)/.test(text.trim());
+}
+
+// ===== Interaction Handlers =====
+function isScenarioQuery(text) {
+  return /送女友|送妈妈|送长辈|送朋友|送闺蜜|自己欣赏|送伴侣|居家|悦己|好友/.test(text);
+}
+
+function routeQuery(text) {
+  state.query = text;
+  if (text.includes('祝福语')) {
+    showOrderCard();
+  } else if (!state.addressShown) {
+    state.pendingQuery = text;
+    showAddressCard();
+  } else {
+    if (isVagueQuery(text)) {
+      showClarifyCard();
+    } else if (isCategoryQuery(text) || isScenarioQuery(text)) {
+      (async () => { await showThinkingCard(); })();
+    } else {
+      (async () => { await showThinkingCard(); })();
+    }
+  }
+}
+
+function selectScenario(text) {
+  state.recipient = text;
+  addUserBubble(text);
+  setTimeout(() => {
+    routeQuery(text);
+  }, 300);
+}
+
+function hideAllChips() {
+  document.querySelectorAll('.suggestion-chips').forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+function updateBlessingDisplay(blessing) {
+  const orderEl = document.getElementById('order-blessing');
+  if (orderEl) {
+    orderEl.textContent = blessing;
+    orderEl.classList.remove('muted');
+  }
+  const detailEl = document.getElementById('detail-blessing');
+  if (detailEl) {
+    detailEl.textContent = blessing;
+    detailEl.classList.remove('muted');
+  }
+}
+
+function sendQuick(text) {
+  const isChip = typeof event !== 'undefined' && event && event.target && event.target.closest('.suggestion-chip');
+
+  if (isChip) {
+    hideAllChips();
+
+    if (text.includes('加个祝福语')) {
+      const blessing = text.replace('加个祝福语，', '').replace(/[""]/g, '').trim();
+      state.blessing = blessing;
+      const chip = event.target.closest('.suggestion-chip');
+      const orderCard = chip && chip.closest('.order-card');
+      if (orderCard) {
+        const blessingEl = orderCard.querySelector('#order-blessing');
+        if (blessingEl) {
+          blessingEl.textContent = blessing;
+          blessingEl.classList.remove('muted');
+        }
+      } else {
+        updateBlessingDisplay(blessing);
+      }
+      return;
+    }
+  }
+
+  addUserBubble(text);
+  setTimeout(() => {
+    routeQuery(text);
+  }, 300);
+}
+
+function handleHomeInputClick() {
+  const text = prompt('请输入您想发送的消息：', '帮我点个鲜花');
+  if (text && text.trim()) {
+    const trimmed = text.trim();
+    switchSurface('home');
+    addUserBubble(trimmed);
+    setTimeout(() => {
+      routeQuery(trimmed);
+    }, 300);
+  }
+}
+
+function handleInputClick() {
+  const text = prompt('请输入您想发送的消息：', '帮我点个鲜花');
+  if (text && text.trim()) {
+    const trimmed = text.trim();
+    addUserBubble(trimmed);
+    setTimeout(() => {
+      routeQuery(trimmed);
+    }, 300);
+  }
+}
+
+function confirmAddress() {
+  state.address = '西溪湿地地铁站A口';
+  state.addressShown = true;
+  addUserBubble('确认地址');
+  setTimeout(() => {
+    const q = state.pendingQuery || state.query;
+    if (isVagueQuery(q)) {
+      showClarifyCard();
+    } else if (isCategoryQuery(q) || isScenarioQuery(q)) {
+      (async () => { await showThinkingCard(); })();
+    } else {
+      (async () => { await showThinkingCard(); })();
+    }
+  }, 300);
+}
+
+function changeAddress() {
+  const addr = prompt('请输入新的地址：', '阿里巴巴西溪区6号楼小邮局');
+  if (addr) {
+    state.address = addr;
+    state.addressShown = true;
+    addUserBubble('更换地址：' + addr);
+    setTimeout(() => {
+      const q = state.pendingQuery || state.query;
+      if (isVagueQuery(q)) {
+        showClarifyCard();
+      } else if (isCategoryQuery(q) || isScenarioQuery(q)) {
+        (async () => { await showThinkingCard(); })();
+      } else {
+        (async () => { await showThinkingCard(); })();
+      }
+    }, 300);
+  }
+}
+
+function selectRecipient(text) {
+  state.recipient = text;
+  addUserBubble(text);
+  setTimeout(() => {
+    (async () => { await showThinkingCard(); })();
+  }, 300);
+}
+
+function selectProduct(key) {
+  state.selectedProduct = BIGCARD_PRODUCTS[key];
+  addUserBubble('选好了，帮我下单');
+  setTimeout(() => {
+    showOrderCard();
+  }, 300);
+}
+
+function selectProductFromList(idx) {
+  state.selectedProduct = LISTCARD_PRODUCTS[idx];
+  addUserBubble('选好了，帮我下单');
+  setTimeout(() => {
+    showOrderCard();
+  }, 300);
+}
+
+function addMore() {
+  addUserBubble('进店加购');
+}
+
+function payNow() {
+  addUserBubble('立即支付');
+  setTimeout(() => {
+    showDetailCard();
+  }, 300);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新手爸爸育儿指南</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#FF7B3A;--primary-hover:#FF9A66;--primary-bg:#FFF4ED;--secondary:#5B8DEF;--secondary-bg:#EDF3FF;--accent:#E8505B;--success:#34C77B;--success-bg:#EDFBF3;--warning:#FFAD33;--warning-bg:#FFF8EB;--bg:#F8F9FC;--card:#FFFFFF;--text:#1A2138;--text-s:#5E6C84;--text-t:#97A3B7;--border:#E8ECF2;--border-l:#F0F3F7;--shadow-sm:0 1px 3px rgba(0,0,0,0.04);--shadow-md:0 4px 12px rgba(0,0,0,0.06);--shadow-lg:0 8px 24px rgba(0,0,0,0.08);--r-sm:8px;--r-md:12px;--r-lg:16px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans SC',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#D0D5DD;border-radius:3px;}
+.card{background:var(--card);border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow-sm);border:1px solid var(--border-l);margin-bottom:20px;}
+.card-section{margin-bottom:32px;}
+.section-anchor{scroll-margin-top:80px;}
+h2.sec-title{font-size:20px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-desc{font-size:13px;color:var(--text-s);margin-bottom:16px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);border:none;cursor:pointer;font-size:12.5px;font-weight:500;transition:all .2s;white-space:nowrap;user-select:none;}
+.btn:active{transform:scale(0.96);}
+.btn-primary{background:var(--primary);color:#fff;}.btn-primary:hover{background:var(--primary-hover);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-s);}.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg);}
+.btn-outline.active{border-color:var(--primary);color:var(--primary);background:var(--primary-bg);font-weight:600;}
+.btn-ghost{background:transparent;color:var(--text-s);}.btn-ghost:hover{background:var(--border-l);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-pill{border-radius:20px;padding:5px 12px;}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:500;}
+.tag-orange{background:var(--primary-bg);color:var(--primary);}.tag-blue{background:var(--secondary-bg);color:var(--secondary);}.tag-green{background:var(--success-bg);color:var(--success);}.tag-red{background:#FDE8E8;color:var(--accent);}.tag-yellow{background:var(--warning-bg);color:#B87A00;}
+input,select,textarea{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:13px;outline:none;transition:all .2s;width:100%;background:var(--card);font-family:inherit;}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,123,58,0.1);}
+/* Layout - Grid */
+.page-wrap{max-width:1400px;margin:0 auto;padding:24px 24px 60px;}
+.grid-layout{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
+.grid-layout .card{margin-bottom:0;}
+.grid-layout .span-2{grid-column:span 2;}
+.grid-layout .span-3{grid-column:span 3;}
+.grid-layout .span-full{grid-column:1/-1;}
+@media(max-width:1100px){.grid-layout{grid-template-columns:repeat(2,1fr);}.grid-layout .span-3{grid-column:span 2;}}
+@media(max-width:700px){.grid-layout{grid-template-columns:1fr;}.grid-layout .span-2,.grid-layout .span-3,.grid-layout .span-full{grid-column:span 1;}}
+/* Top nav bar */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(248,249,252,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border-l);padding:10px 24px;margin:-24px -24px 20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.top-nav a{padding:6px 12px;border-radius:6px;font-size:12px;color:var(--text-s);text-decoration:none;transition:all .15s;font-weight:500;}
+.top-nav a:hover{background:var(--primary-bg);color:var(--primary);}
+.top-nav .nav-brand{font-size:14px;font-weight:700;color:var(--primary);margin-right:12px;display:flex;align-items:center;gap:5px;}
+/* Hide old side-nav */
+.side-nav{display:none;}
+/* Knowledge */
+.k-card{padding:16px 18px;border-radius:var(--r-md);border:1px solid var(--border-l);transition:all .2s;background:var(--card);}
+.k-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(255,123,58,0.06);}
+.k-title{font-size:13.5px;font-weight:600;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.k-body{font-size:13px;line-height:1.85;color:var(--text);}
+.k-body p{margin-bottom:6px;}.k-body strong{font-weight:600;}
+.k-body ul{margin:4px 0 8px 16px;}.k-body li{margin-bottom:4px;list-style:disc;}
+.k-warn{border-left:3px solid var(--warning);padding:8px 12px;background:var(--warning-bg);border-radius:0 6px 6px 0;margin-top:8px;font-size:12px;line-height:1.7;}
+/* Stat */
+.stat-card{text-align:center;padding:14px 8px;border-radius:var(--r-md);background:var(--bg);border:1px solid var(--border-l);}
+.stat-num{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--primary),#FF5E8A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:10px;color:var(--text-t);margin-top:2px;}
+/* Checkbox */
+.chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.chk:hover{border-color:var(--primary);}.chk.done{background:var(--success);border-color:var(--success);}
+/* Timer */
+.timer-card{padding:14px 16px;border-radius:var(--r-md);border:1px solid var(--border-l);background:var(--card);display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.timer-elapsed{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;min-width:60px;}
+.timer-warn{color:var(--accent);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+/* Progress */
+.progress{height:5px;border-radius:3px;background:var(--border-l);overflow:hidden;}.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--primary-hover));transition:width .5s;}
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal{background:var(--card);border-radius:var(--r-lg);padding:24px;width:90%;max-width:380px;box-shadow:var(--shadow-lg);}
+/* Toast */
+.toast-box{position:fixed;top:16px;right:16px;z-index:9999;}
+.toast{padding:10px 16px;border-radius:var(--r-sm);background:var(--card);box-shadow:var(--shadow-lg);font-size:12.5px;display:flex;align-items:center;gap:6px;margin-bottom:6px;border-left:3px solid var(--success);animation:slideR .3s;}
+.toast-w{border-left-color:var(--warning);}
+@keyframes slideR{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* Chat */
+.chat-bubble{max-width:82%;padding:10px 14px;border-radius:var(--r-md);margin-bottom:6px;line-height:1.7;font-size:13px;white-space:pre-wrap;word-break:break-word;}
+.chat-u{background:var(--primary);color:#fff;margin-left:auto;border-bottom-right-radius:3px;}
+.chat-a{background:#F4F6F9;color:var(--text);border-bottom-left-radius:3px;}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--text-t);display:inline-block;margin:0 2px;animation:bop 1.4s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-3px)}}
+/* Reminder badge */
+.remind-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;background:#FDE8E8;color:var(--accent);animation:pulse 2s infinite;}
+/* Daily button */
+.daily-btn{border-radius:var(--r-md);padding:10px 14px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:68px;cursor:pointer;transition:all .2s;border:1.5px solid var(--border-l);}
+.daily-btn:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow-sm);}
+.daily-btn:active{transform:scale(0.95);}
+</style>
+</head>
+<body>
+<div id="app">
+<!-- Toast -->
+<div class="toast-box"><div v-for="(t,i) in toasts" :key="i" class="toast" :class="{'toast-w':t.w}">{{t.icon}} {{t.msg}}</div></div>
+
+<!-- Notification permission banner -->
+<div v-if="showNotifBanner" style="position:fixed;top:0;left:0;right:0;z-index:999;background:var(--warning-bg);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;border-bottom:1px solid #F0D88C;">
+  <span>🔔 开启浏览器通知，我才能在该喂奶/换尿布时提醒你</span>
+  <div class="btn btn-primary btn-sm" @click="requestNotif">允许通知</div>
+  <div class="btn btn-ghost btn-sm" @click="showNotifBanner=false">稍后</div>
+</div>
+
+<!-- Modal -->
+<div v-if="modal.show" class="modal-bg" @click.self="modal.show=false">
+<div class="modal">
+  <h3 style="font-size:15px;font-weight:600;margin-bottom:14px;">{{modal.title}}</h3>
+  <div style="margin-bottom:12px;">
+    <label style="font-size:11px;color:var(--text-s);display:block;margin-bottom:4px;">时间</label>
+    <input type="datetime-local" v-model="modal.time" style="font-size:13px;">
+  </div>
+  <div style="margin-bottom:14px;">
+    <label style="font-size:11px;color:var(--text-s);display:block;margin-bottom:4px;">备注（可选）</label>
+    <input v-model="modal.note" placeholder="如：奶量120ml / 左侧喂15分钟" style="font-size:13px;">
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;">
+    <div class="btn btn-ghost" @click="modal.show=false">取消</div>
+    <div class="btn btn-primary" @click="confirmRecord">确定记录</div>
+  </div>
+</div>
+</div>
+
+<!-- Main content -->
+<div class="page-wrap">
+
+<!-- Top nav -->
+<div class="top-nav">
+  <span class="nav-brand">🍼 育儿指南</span>
+  <a href="#sec-profile">👶 档案</a>
+  <a href="#sec-remind">🔔 提醒</a>
+  <a href="#sec-daily">📝 记录</a>
+  <a href="#sec-knowledge">📚 知识</a>
+  <a href="#sec-milestones">🎯 里程碑</a>
+  <a href="#sec-stats">📊 统计</a>
+  <a href="#sec-ai">🤖 AI</a>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <div class="btn btn-outline btn-sm" @click="exportData">📤 备份</div>
+    <div class="btn btn-outline btn-sm" @click="$refs.imp.click()">📥 导入</div>
+    <input type="file" ref="imp" style="display:none" accept=".json" @change="importData">
+  </div>
+</div>
+
+<div class="grid-layout">
+
+<!-- ===== 宝宝档案 ===== -->
+<div id="sec-profile" class="section-anchor">
+<div class="card">
+  <h2 class="sec-title">👶 宝宝档案</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:6px;">
+    <div><label style="font-size:11px;color:var(--text-s);display:block;margin-bottom:4px;">姓名</label><input v-model="baby.name" placeholder="宝宝名字" @change="saveData"></div>
+    <div><label style="font-size:11px;color:var(--text-s);display:block;margin-bottom:4px;">性别</label><select v-model="baby.gender" @change="saveData"><option value="">选择</option><option value="male">男宝</option><option value="female">女宝</option></select></div>
+    <div><label style="font-size:11px;color:var(--text-s);display:block;margin-bottom:4px;">出生日期</label><input type="date" v-model="baby.birthday" @change="saveData"></div>
+  </div>
+  <div v-if="baby.birthday" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px;margin-top:16px;">
+    <div class="stat-card"><div class="stat-num">{{age.display}}</div><div class="stat-label">年龄</div></div>
+    <div class="stat-card"><div class="stat-num">{{age.totalDays}}</div><div class="stat-label">天</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:18px;background:none;-webkit-text-fill-color:var(--secondary);">{{constellation}}</div><div class="stat-label">星座</div></div>
+    <div class="stat-card"><div class="stat-num" style="font-size:18px;background:none;-webkit-text-fill-color:var(--primary);">属{{zodiac}}</div><div class="stat-label">生肖</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 提醒中心 ===== -->
+<div id="sec-remind" class="section-anchor span-2">
+<div class="card">
+  <h2 class="sec-title">🔔 提醒中心</h2>
+  <p class="sec-desc">根据宝宝月龄和你的记录，自动提醒该做的事</p>
+
+  <!-- 实时计时器 -->
+  <div v-if="baby.birthday" style="margin-bottom:16px;">
+    <div style="font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:10px;">⏱️ 距上次操作已过</div>
+    <div v-for="timer in activeTimers" :key="timer.type" class="timer-card">
+      <span style="font-size:18px;">{{timer.icon}}</span>
+      <div style="flex:1;"><div style="font-size:12px;font-weight:500;">{{timer.label}}</div><div style="font-size:10px;color:var(--text-t);">建议间隔 {{timer.suggest}}</div></div>
+      <div class="timer-elapsed" :class="{'timer-warn':timer.overdue}">{{timer.elapsed}}</div>
+      <div v-if="timer.overdue" class="remind-badge">该{{timer.action}}了</div>
+    </div>
+  </div>
+
+  <!-- 本周提醒 -->
+  <div v-if="weekReminders.length>0">
+    <div style="font-size:12px;font-weight:600;color:var(--text-s);margin-bottom:10px;">📅 本周注意事项</div>
+    <div v-for="(r,i) in weekReminders" :key="i" style="padding:10px 14px;border-radius:var(--r-sm);border:1px solid var(--border-l);margin-bottom:6px;display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:14px;margin-top:1px;">{{r.icon}}</span>
+      <div><div style="font-size:13px;font-weight:500;">{{r.title}}</div><div style="font-size:11px;color:var(--text-s);margin-top:2px;">{{r.detail}}</div></div>
+      <span class="tag" :class="r.tagClass" style="margin-left:auto;">{{r.tag}}</span>
+    </div>
+  </div>
+  <div v-else-if="!baby.birthday" style="text-align:center;padding:20px;color:var(--text-t);font-size:13px;">请先填写宝宝出生日期</div>
+  <div v-else style="text-align:center;padding:20px;color:var(--text-t);font-size:13px;">🎉 本周没有特殊事项，继续保持日常节奏</div>
+</div>
+</div>
+
+<!-- ===== 每日记录 ===== -->
+<div id="sec-daily" class="section-anchor span-2">
+<div class="card">
+  <h2 class="sec-title">📝 每日记录</h2>
+  <p class="sec-desc">点击打卡，长按可调时间和备注</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+    <div v-for="t in taskTypes" :key="t.key" class="daily-btn" :style="{background:t.bg}" @click="openModal(t.key)">
+      <span style="font-size:18px;">{{t.icon}}</span>
+      <span style="font-size:10.5px;font-weight:500;color:var(--text-s);">{{t.label}}</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+    <div class="btn btn-ghost btn-sm" @click="moveDay(-1)">◀</div>
+    <input type="date" v-model="viewDate" style="width:auto;font-size:12px;padding:5px 10px;">
+    <div class="btn btn-ghost btn-sm" @click="moveDay(1)">▶</div>
+    <div class="btn btn-ghost btn-sm" @click="viewDate=todayStr">今天</div>
+    <span style="font-size:11px;color:var(--text-t);margin-left:auto;">{{dayRecords.length}} 条记录</span>
+  </div>
+  <div v-if="dayRecords.length===0" style="text-align:center;padding:24px;color:var(--text-t);font-size:13px;">暂无记录</div>
+  <div v-else>
+    <div v-for="(r,i) in dayRecords" :key="r.id" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-sm);margin-bottom:6px;background:var(--bg);">
+      <span style="font-size:16px;">{{getIcon(r.type)}}</span>
+      <div style="flex:1;min-width:0;"><span style="font-size:12.5px;font-weight:500;">{{getLabel(r.type)}}</span><span v-if="r.note" style="font-size:11px;color:var(--text-t);margin-left:6px;">{{r.note}}</span></div>
+      <span style="font-size:11px;color:var(--text-t);white-space:nowrap;">{{fmtTime(r.time)}}</span>
+      <div class="btn btn-ghost btn-sm" style="color:var(--accent);padding:3px 6px;" @click="delRecord(r)">×</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 统计 ===== -->
+<div id="sec-stats" class="section-anchor">
+<div class="card">
+  <h2 class="sec-title">📊 成长统计</h2>
+  <div style="margin-bottom:14px;display:flex;gap:6px;flex-wrap:wrap;">
+    <div v-for="v in [{k:'chart',l:'📈 图表'},{k:'dots',l:'🔵 圆点'},{k:'list',l:'📋 列表'}]" :key="v.k" class="btn btn-pill btn-outline" :class="{active:statView===v.k}" @click="statView=v.k">{{v.l}}</div>
+  </div>
+  <div v-if="statView==='chart'"><canvas ref="chartEl" style="max-height:220px;"></canvas></div>
+  <div v-if="statView==='dots'" style="display:flex;flex-wrap:wrap;gap:3px;">
+    <div v-for="(e,i) in allEvents.slice(0,300)" :key="i" class="dot" style="width:8px;height:8px;border-radius:50%;cursor:pointer;transition:transform .2s;" :style="{background:evtColor(e.type)}" :title="e.title+' '+fmtDT(e.time)"></div>
+  </div>
+  <div v-if="statView==='list'" style="max-height:300px;overflow-y:auto;">
+    <div v-for="(e,i) in allEvents.slice(0,80)" :key="i" style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-l);font-size:12px;">
+      <span style="color:var(--text-t);min-width:80px;">{{fmtDT(e.time)}}</span><span class="tag tag-blue">{{e.category}}</span><span style="flex:1;">{{e.title}}</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 知识库 ===== -->
+<div id="sec-knowledge" class="section-anchor span-full">
+<div class="card" style="padding-bottom:14px;">
+  <h2 class="sec-title">📚 育儿知识库</h2>
+  <p class="sec-desc">按月龄查看全维度专业知识 · 争议内容标注⚠️ · 含具体实操方法</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+    <div v-for="s in kStages" :key="s.key" class="btn btn-pill btn-outline" :class="{active:kSel===s.key}" @click="kSel=s.key">{{s.label}}</div>
+  </div>
+</div>
+<div v-if="kData" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;">
+  <div v-for="(sec,i) in kData.sections" :key="i" class="k-card">
+    <div class="k-title">{{sec.icon}} {{sec.title}}</div>
+    <div class="k-body" v-html="sec.content"></div>
+    <div v-if="sec.controversial" class="k-warn"><strong>⚠️ 有争议：</strong>{{sec.controversial}}</div>
+  </div>
+</div>
+</div>
+
+<!-- ===== 里程碑 ===== -->
+<div id="sec-milestones" class="section-anchor">
+<div class="card">
+  <h2 class="sec-title">🎯 里程碑进度</h2>
+  <div v-if="baby.birthday" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+    <div class="progress" style="flex:1;"><div class="progress-fill" :style="{width:msProgress+'%'}"></div></div>
+    <span style="font-size:12px;color:var(--text-s);">{{msDoneCount}}/{{msAll.length}}</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+    <div class="btn btn-pill btn-outline" :class="{active:msFilter==='all'}" @click="msFilter='all'">全部</div>
+    <div class="btn btn-pill btn-outline" :class="{active:msFilter==='pending'}" @click="msFilter='pending'">待完成</div>
+    <div class="btn btn-pill btn-outline" :class="{active:msFilter==='done'}" @click="msFilter='done'">已完成</div>
+  </div>
+  <div v-for="(item,i) in msFiltered" :key="item.id" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-sm);margin-bottom:6px;background:var(--bg);">
+    <div class="chk" :class="{done:item.done}" @click="toggleMs(item.id)"><svg v-if="item.done" viewBox="0 0 12 12" width="11" fill="none" stroke="#fff" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg></div>
+    <div style="flex:1;min-width:0;"><div style="font-size:12.5px;font-weight:500;" :style="{opacity:item.done?.5:1}">{{item.title}}</div><div style="font-size:10px;color:var(--text-t);">{{item.ageLabel}}</div></div>
+    <span class="tag" :class="catTag(item.category)">{{item.category}}</span>
+    <span v-if="item.done" style="font-size:10px;color:var(--success);">{{fmtDate(item.doneAt)}}</span>
+  </div>
+  <div v-if="!baby.birthday" style="text-align:center;padding:20px;color:var(--text-t);font-size:13px;">请先填写出生日期</div>
+</div>
+</div>
+
+<!-- ===== AI问答 ===== -->
+<div id="sec-ai" class="section-anchor span-2">
+<div class="card" style="padding:0;overflow:hidden;">
+  <div style="padding:20px 24px 12px;border-bottom:1px solid var(--border-l);">
+    <h2 class="sec-title" style="margin-bottom:2px;">🤖 AI 育儿问答</h2>
+    <div style="font-size:11px;color:var(--text-t);display:flex;align-items:center;gap:8px;">接入阿里百炼
+      <details style="display:inline;"><summary style="cursor:pointer;">⚙️ 设置Key</summary><div style="margin-top:6px;display:flex;gap:6px;"><input v-model="apiKey" type="password" style="flex:1;font-size:11px;padding:5px 8px;"><div class="btn btn-sm btn-primary" @click="saveKey">保存</div></div></details>
+    </div>
+  </div>
+  <div style="height:360px;overflow-y:auto;padding:16px 24px;" ref="chatBox">
+    <div v-if="msgs.length===0" style="text-align:center;padding:40px 10px;color:var(--text-t);">
+      <div style="font-size:36px;margin-bottom:8px;">👨‍👧</div>
+      <div style="font-size:13px;">有任何育儿问题都可以问我</div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+        <div v-for="q in quickQ" :key="q" class="btn btn-outline btn-sm" @click="chatInput=q;sendChat()">{{q}}</div>
+      </div>
+    </div>
+    <div v-for="(m,i) in msgs" :key="i" style="display:flex;margin-bottom:6px;" :style="{justifyContent:m.role==='user'?'flex-end':'flex-start'}">
+      <div class="chat-bubble" :class="m.role==='user'?'chat-u':'chat-a'"><span v-if="!m.loading">{{m.content}}</span><span v-else class="typing"><span></span><span></span><span></span></span></div>
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--border-l);padding:12px 24px;display:flex;gap:8px;">
+    <input v-model="chatInput" placeholder="输入问题..." @keyup.enter="sendChat" style="flex:1;border-radius:20px;padding:9px 16px;font-size:13px;">
+    <div class="btn btn-primary" style="border-radius:50%;width:36px;height:36px;padding:0;" @click="sendChat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div>
+  </div>
+</div>
+</div>
+
+</div><!-- grid-layout -->
+</div><!-- page-wrap -->
+</div><!-- app -->
+
+<script>
+const{createApp,ref,computed,watch,onMounted,onUnmounted,nextTick}=Vue;
+
+// ======== KNOWLEDGE DATA (expanded with more dimensions) ========
+const K={"0m":{title:"新生儿(0-1月)",sections:[
+{icon:"🍼",title:"喂养指南",content:`<p><strong>母乳：</strong>出生后1小时内开奶。按需哺乳，24小时约8-12次。初乳量少(每次5-7ml)但含大量免疫球蛋白IgA。</p><p><strong>具体操作：</strong></p><ul><li>正确衔乳姿势：宝宝嘴张大(>120°)，含住大部分乳晕而非仅乳头，下唇外翻，能听到"咕噜"吞咽声</li><li>每侧喂10-15分钟，先排空一侧再换另一侧</li><li>判断吃饱：24h湿尿布≥6片，大便金黄糊状2-4次/天</li></ul><p><strong>配方奶：</strong>一段奶粉，每次60-90ml，2-3小时一次。<strong>冲调必须精确：</strong>先加水后加粉，1平勺(刮平)对30ml水(各品牌不同务必看说明)。过浓伤肾，过稀营养不足。</p><p><strong>拍嗝三种方法：</strong></p><ul><li>竖抱法：竖抱宝宝靠在肩膀，手掌空心从下往上拍背</li><li>坐姿法：让宝宝坐在腿上，一手托下巴，另一手拍背</li><li>俯卧法：宝宝趴在你大腿上，头高于胸，拍背</li></ul>`,controversial:"关于'开奶师/催乳师'：无医学资质的暴力手法可致乳腺损伤甚至脓肿。建议首选三甲医院母乳喂养门诊(IBCLC认证顾问)。"},
+{icon:"😴",title:"睡眠管理",content:`<p>每天16-18小时，无昼夜节律。每次清醒仅45-60分钟。</p><p><strong>安全睡眠铁律（AAP 2022）：</strong></p><ul><li>永远仰卧（不是侧卧！）</li><li>硬平床垫 + 合身床单，无枕头/被子/围挡/毛绒玩具</li><li>同室不同床（减少SIDS风险50%）</li><li>室温20-22℃，穿睡袋替代盖被</li></ul><p><strong>爸爸实操技巧：</strong></p><ul><li>白天不刻意遮光/压低声音，帮助建立昼夜概念</li><li>放下时机：眼皮沉重/打哈欠/揉耳朵 = 困了，立刻放床</li><li>新生儿不需要睡眠训练，需要的是"安全感"——抱睡是正常的</li></ul>`,controversial:"'同床睡'：WHO/AAP明确反对，增加SIDS风险。但日本/亚洲文化普遍同床。如必须同床：硬床垫、不吸烟饮酒服药、不盖厚被。"},
+{icon:"🌡️",title:"常见疾病与就医",content:`<p><strong>新生儿黄疸：</strong></p><ul><li>生理性：出生后2-3天出现，7-14天消退。面部/胸部轻微黄染正常</li><li><strong>必须就医：</strong>出生24h内黄、黄染达四肢/手心脚心、精神差/不吃奶、大便发白</li><li>处理：多喂奶多排便；窗边晒散射光(非直射太阳)</li></ul><p><strong>脐炎：</strong>脐部红肿/有脓液异味→就医。正常护理：保持干燥，尿布折到脐下，不用酒精(WHO建议自然干燥)。</p><p><strong>必须立即急诊的信号（任何月龄通用）：</strong></p><ul><li>体温≥38℃(3月内任何发热都要去！)或≤35.5℃</li><li>呼吸急促(>60次/分)/胸骨凹陷/嘴唇发紫</li><li>抽搐/意识模糊/持续尖叫不安慰</li><li>呕吐物含血/绿色胆汁/喷射性呕吐</li><li>12小时以上无尿</li></ul>`},
+{icon:"🏋️",title:"运动发育与训练",content:`<p><strong>当前能力：</strong>四肢屈曲、抓握反射（掌心放手指会握住）、踏步反射（扶站时有迈步动作，2月龄消失）。</p><p><strong>Tummy Time（趴趴时间）入门：</strong></p><ul><li>从出生即可开始！每次1-3分钟，每天累计10-15分钟</li><li>方法：宝宝趴在你胸口(最佳起步)→趴在软垫上→趴在床上</li><li>如果哭闹：缩短时间、换成趴在爸爸胸口聊天、面前放黑白卡吸引</li><li><strong>为什么重要：</strong>预防偏头/防后脑扁平、锻炼颈背肌肉为翻身爬行打基础</li></ul>`},
+{icon:"🗣️",title:"语言与情感发展",content:`<p><strong>当前阶段：</strong>只有哭声（分化为饥饿哭/疼痛哭/无聊哭），和少量喉音。</p><p><strong>爸爸能做的（非常重要！）：</strong></p><ul><li>多说话！换尿布时说"爸爸给你换干净的尿布哦"——这不是自言自语，是在建立神经连接</li><li>面对面20cm距离说话，夸张嘴型和表情</li><li>回应哭声：这个阶段不存在"惯坏"，及时回应=建立安全感</li><li>区分哭声：饥饿(节奏性)、疼痛(突然尖锐高亢)、困(闹+揉眼)</li></ul><p><strong>爸爸的情绪也很重要：</strong>新生儿极度敏感环境情绪。如你感到崩溃——把宝宝安全放床上离开房间深呼吸几分钟是OK的。</p>`},
+{icon:"🥗",title:"营养要点",content:`<p><strong>本月100%依赖乳汁（母乳或配方奶），不需要任何补充！</strong></p><p>唯一例外：<strong>维生素D</strong>——出生后即开始补充400IU/天(无论母乳还是配方奶)，直到能从食物获取足够(约1岁以后)。</p><p><strong>不要给：</strong>水(乳汁含87%水)、葡萄糖水、蜂蜜(肉毒杆菌风险!)、米汤、任何"辅食"。</p><p><strong>妈妈/配方奶选择不影响智商——焦虑本身影响比喂养方式更大。Fed is best.</strong></p>`},
+{icon:"💉",title:"疫苗与体检",content:`<p><strong>出生24小时内接种：</strong></p><ul><li>卡介苗(左上臂，预防结核)——会形成小脓包/结痂/小疤，正常！不要挤/涂药</li><li>乙肝疫苗第1剂(大腿外侧)</li></ul><p><strong>出生后筛查：</strong></p><ul><li>72小时足跟血筛查(PKU苯丙酮尿症等20+遗传代谢病)</li><li>听力筛查(OAE/ABR)</li><li>先天性心脏病筛查(脉搏血氧)</li></ul><p><strong>体检时间表：</strong>出院前、满月(42天)——带上出生记录去社区卫生中心。</p>`}
+]},
+"1m":{title:"1-2个月",sections:[
+{icon:"🍼",title:"喂养指南",content:`<p>奶量增至90-120ml/次(配方奶)，母乳按需。<strong>猛涨期(Growth Spurt)：</strong>约第2、3、6周出现，表现为频繁要奶+烦躁+夜醒增多，持续2-3天。不是奶不够！继续按需喂就能度过。</p><p><strong>肠绞痛实操缓解法（5S法）：</strong></p><ul><li>Swaddle包紧：用薄毯包裹(双手贴身侧或胸前)模拟子宫</li><li>Side侧卧：抱着时让宝宝侧身或趴在你小臂上(飞机抱)</li><li>Shush嘘声：贴近耳朵发"嘘——"声或开吹风机/抽油烟机</li><li>Swing摇晃：小幅快频率(不是大幅摇！)，模拟子宫内运动</li><li>Suck吸吮：给安抚奶嘴(不影响母乳喂养)</li></ul>`,controversial:"'益生菌治肠绞痛'：Lactobacillus reuteri DSM17938有RCT支持，但仅对母乳宝宝效果明确。不建议盲目买其他菌株产品。"},
+{icon:"😴",title:"睡眠管理",content:`<p>总睡14-17小时。开始有昼夜分化苗头。</p><p><strong>帮助建立昼夜节律的方法：</strong></p><ul><li>白天：喂奶时开灯/拉窗帘，正常说话，活动后再睡</li><li>夜间：灯光调暗(暖黄<5W)，喂完不互动直接放回</li><li>标记"最后一次喂奶"为夜间起始（如晚8点后→夜间模式）</li></ul><p><strong>安全提醒：</strong>1月龄可以开始用防惊跳睡袋(arms-up式)替代襁褓，为后续戒襁褓做准备。</p>`},
+{icon:"🌡️",title:"常见问题处理",content:`<p><strong>湿疹（特应性皮炎）：</strong></p><ul><li>核心是保湿！每天3-5次厚涂无香料保湿霜(丝塔芙/凡士林/Aveeno均可)</li><li>洗澡水温37℃/时间<10分钟/不用沐浴露(清水即可)/拍干后立即涂保湿</li><li>轻度(红+粗糙)：保湿即可。中度(破皮渗液)：加1%氢化可的松软膏(OTC)涂薄层3-5天</li><li>严重(大面积/影响睡眠)：就医开处方药膏</li></ul><p><strong>鼻塞：</strong>新生儿鼻腔窄，不代表感冒。用生理盐水滴鼻(每侧1-2滴)→等30秒→用吸鼻器轻吸。不要用棉签伸进去！</p><p><strong>红屁屁(尿布疹)：</strong></p><ul><li>预防：勤换(湿了就换)、每次换完晾干或吹干、涂氧化锌护臀霜(预防性薄涂)</li><li>已发红：加厚氧化锌、每次换尿布晾屁屁5分钟、可以不穿尿布趴着(下面垫隔尿垫)</li></ul>`},
+{icon:"🏋️",title:"运动训练",content:`<p><strong>本月目标：</strong>颈部力量提升，为抬头做准备。</p><ul><li>Tummy Time每天总计15-30分钟(分多次)</li><li>进阶：爸爸躺下，宝宝趴在你胸口，和他面对面说话吸引抬头</li><li>拉起练习：平躺拉手腕慢慢拉到45°(注意头是否跟上)——锻炼颈肌</li><li>侧卧玩：侧躺看玩具，锻炼身体中线意识</li></ul>`},
+{icon:"🗣️",title:"语言与互动",content:`<p><strong>里程碑：</strong>社交性微笑(约6周)——这是第一次真正的社交互动！</p><p><strong>实操：</strong></p><ul><li>面对面20cm，对宝宝微笑说话，等他回应（哪怕只是凝视）再继续——这是"对话轮回"训练</li><li>模仿宝宝的"啊~""噢~"声——让他知道发声会得到回应</li><li>唱简短儿歌(两只老虎/小星星)，配合温和的身体抚触</li></ul>`},
+{icon:"💉",title:"疫苗",content:`<p><strong>满1月龄：</strong>乙肝疫苗第2剂。</p><p><strong>注意：</strong>接种后可能低热(<38.5℃)、注射部位红肿——正常反应，24-48h消退。超过38.5℃或持续>48h就医。</p>`}
+]},
+"2m":{title:"2-4个月",sections:[
+{icon:"🍼",title:"喂养指南",content:`<p>120-150ml/次，间隔3-4小时趋于规律。可能出现<strong>"假性厌奶"</strong>：对环境好奇，吃几口就扭头看——不是真厌奶。</p><p><strong>应对厌奶：</strong></p><ul><li>安静昏暗环境喂(关电视/拉帘子)</li><li>迷糊奶(半睡半醒时喂，但不养成习惯)</li><li>不追喂不强喂——真饿了会找的</li><li>评估标准：每天总奶量≥600ml+体重在曲线上正常增长=OK</li></ul><p><strong>维生素D继续400IU/天。</strong>如已添加配方奶≥800ml/天，VD可能已够(看配方奶标签)。</p>`},
+{icon:"😴",title:"睡眠管理",content:`<p>总睡14-16小时。白天3-4次小睡→逐渐规律化为3次。</p><p><strong>建立就寝仪式（超重要！）：</strong></p><ul><li>固定流程：洗澡(37℃ 5-8分钟)→按摩(全身用婴儿油轻抚)→换睡袋→喂奶(或喂完10分钟再放)→哼歌/白噪音→放床</li><li>每天同一时间开始(建议晚7-8点)</li><li>仪式时间15-30分钟，不要拖太长</li></ul><p><strong>4月龄睡眠倒退预警：</strong>之前夜间长睡突然变成1-2小时一醒——因为睡眠周期从新生儿式(深浅2段)成熟为成人式(4-5段)。不是退步是进步！保持仪式不变，1-4周会适应。</p>`,controversial:"'Sleep training'(2-3月龄是否太早)：主流建议4月龄后再正式训练。此阶段核心是'规律作息+固定仪式'，不是cry-it-out。"},
+{icon:"🌡️",title:"常见疾病处理",content:`<p><strong>婴儿湿疹加重期应对：</strong></p><ul><li>找触发因素：过热(最常见！)、出汗、口水刺激、特定洗衣液</li><li>穿衣原则：和大人一样或少一层。宝宝代谢快，热比冷危险</li><li>不要因为湿疹就不洗澡——低温短时清水浴+即刻保湿反而有帮助</li></ul><p><strong>肠绞痛peak期(6周)：</strong></p><ul><li>确认不是其他问题：饥饿?尿布?过热?肠套叠(阵发性哭+血便)?</li><li>排除后：5S法轮流尝试。每种给60秒起效时间</li><li>如果自己快崩溃：把宝宝安全放婴儿床走出去5分钟。没有人能无限承受哭声</li></ul><p><strong>2月龄后可能出现：</strong>头上黄色油腻痂皮(脂溢性皮炎/摇篮帽)→橄榄油软化30分钟→软梳轻刷→清水洗掉。通常3-4月自愈。</p>`},
+{icon:"🏋️",title:"运动发育与训练",content:`<p><strong>里程碑：</strong></p><ul><li>2月：俯卧抬头45°-90°；追视180°</li><li>3月：双手中线相碰；可能开始翻身(仰→俯)</li><li>4月：稳定翻身；双手抓物放嘴里；拉坐头不后倒</li></ul><p><strong>训练方法：</strong></p><ul><li>Tummy Time 30-60分钟/天：用卷毛巾垫胸下(降低难度)、面前放彩色玩具、爸爸趴对面互动</li><li>翻身辅助：宝宝仰卧时把一条腿搭到另一条上→身体自然想跟着转→用玩具在侧面引导</li><li>抓握训练：递各种安全抓物(布条/硅胶圈/摇铃)，放在手边让他自己够</li><li>体操：自行车蹬腿(仰卧轮流屈伸双腿)→排气+锻炼腿部</li></ul>`},
+{icon:"🗣️",title:"语言与情感",content:`<p><strong>里程碑：</strong>"咕咕"发声(cooing)——元音为主"啊~噢~"。能对声音转头寻找。对人脸特别是嘴部高度关注。</p><p><strong>语言输入方法（越多越好）：</strong></p><ul><li>解说生活："爸爸在给你泡奶哦，水温37度，倒入3勺奶粉..."</li><li>等待回应：说一句→停3-5秒等宝宝"回答"(表情/发声)→再接话</li><li>不同声调：夸张语调(parentese)比平淡语调更能吸引婴儿注意力</li><li>读绘本：不需要读完整本，指着图说"看！红色的球"就是最好的启蒙</li></ul><p><strong>情感发展：</strong>3-4月龄分离焦虑前兆可能出现——放下就哭。这不是坏习惯是正常依恋形成。</p>`},
+{icon:"💉",title:"疫苗与体检",content:`<p><strong>2月龄：</strong>脊灰灭活疫苗(IPV)第1剂</p><p><strong>3月龄：</strong>脊灰第2剂 + 百白破第1剂</p><p><strong>4月龄：</strong>脊灰第3剂 + 百白破第2剂</p><p><strong>接种前准备：</strong>确认无发热/腹泻/用药。穿宽松衣服方便露出手臂/大腿。带接种本！</p><p><strong>接种后观察：</strong>留观30分钟→当天不洗澡→可能低热/烦躁正常→超38.5℃或异常哭闹>3小时就医。</p>`}
+]},
+"4m":{title:"4-6个月",sections:[
+{icon:"🍼",title:"喂养指南",content:`<p>每天总奶量800-1000ml趋于稳定。<strong>观察辅食准备信号(通常5-6月龄出现)：</strong></p><ul><li>✅ 能坐(有支撑即可)</li><li>✅ 挺舌反射消失(勺子伸进去不会用舌头顶出)</li><li>✅ 对大人食物表现出兴趣(盯着看/流口水/伸手够)</li><li>✅ 头部控制良好</li></ul><p><strong>辅食准备清单：</strong>辅食机或研磨碗、硅胶软勺、吸盘碗、围兜(有兜的)、高铁婴儿米粉(首选)。</p><p><strong>5月龄后训练杯饮水：</strong>买鸭嘴杯/吸管杯，喂完奶后给几口水(培养习惯)，为1岁戒奶瓶做准备。</p>`},
+{icon:"😴",title:"睡眠管理",content:`<p>白天2-3次小睡(上午/下午各1-2h+傍晚短觉)。逐渐可以考虑温和睡眠引导。</p><p><strong>温和方法推荐：</strong></p><ul><li>椅子法(Chair Method)：在床边坐着陪→每3天椅子往门口移一步→最终离开</li><li>抱起放下法(Pick Up Put Down)：哭了抱起安慰→停止哭就放回→重复(需耐心，可能50+次/晚起初)</li><li>渐进等待法(Ferber改良)：放下→1分钟后回去拍拍→3分钟→5分钟→逐天延长</li></ul><p><strong>注意：</strong>任何方法都需要前置条件：月龄≥4月+固定作息+健康+亲密关系稳定。单亲爸爸可能更累，选择对自己也可持续的方式。</p>`,controversial:"CIO(Cry It Out)：2016 Pediatrics研究显示无长期情绪/依恋伤害；但反对者指出不应忽视所有哭泣。折中推荐：'有回应的渐进法'而非完全不回应。"},
+{icon:"🌡️",title:"常见疾病",content:`<p><strong>发烧处理(3月龄后)：</strong></p><ul><li>≥38℃：物理降温(减衣/温水擦身)+观察精神状态</li><li>≥38.5℃或精神差：对乙酰氨基酚(泰诺林) 10-15mg/kg 每4-6h(3月龄后可用)</li><li>≥39℃且对退烧药反应差/精神差：就医</li><li><strong>6月龄后才能用布洛芬(美林)</strong></li></ul><p><strong>出牙(通常4-7月开始)：</strong></p><ul><li>症状：流口水加剧、咬一切东西、牙龈红肿可见白点、轻度烦躁、低热(<38℃)</li><li>缓解：冷藏(非冷冻)磨牙胶、冷湿纱布裹手指让宝宝咬、轻柔按摩牙龈</li><li><strong>不要用：</strong>含苯佐卡因的出牙凝胶(FDA黑框警告)、琥珀项链(窒息/勒伤风险)</li></ul><p><strong>腹泻：</strong>每天>5次水样便/便中有血丝/伴发热→就医。轻度(次数稍增/略稀)：继续喂奶不断食，观察尿量。</p>`},
+{icon:"🏋️",title:"运动发育",content:`<p><strong>里程碑：</strong></p><ul><li>4月：稳定翻身、拉坐头稳、双手对握</li><li>5月：扶站短暂承重、准确抓取后换手、拍打桌面</li><li>6月：开始独坐(前倾/三角支撑)、匍匐爬前兆(原地打转/后退)</li></ul><p><strong>训练（每天最少30分钟自由活动时间在地垫上）：</strong></p><ul><li>不要长时间放婴儿椅/摇椅！限制了运动发展</li><li>坐姿训练：用哺乳枕围成半圆后面支撑，面前放玩具让他够</li><li>爬行准备：俯卧时脚底抵住你的手(给支撑力)让他体验蹬的感觉</li><li>精细：给不同形状物体(环形/球形/块状)交替递→发展抓握模式变化</li></ul>`},
+{icon:"🗣️",title:"语言与社交",content:`<p><strong>里程碑：</strong>从cooing进入babbling(辅音+元音)——"ba""ma""da"重复音节(无意义)。对自己名字开始有反应。</p><p><strong>关键训练：</strong></p><ul><li>指物命名：指着灯说"灯"、指着狗说"狗"——每天至少100+个"指认"</li><li>情绪命名："你笑了！你开心""你哭了，是不舒服吗"——教情绪词汇</li><li>不要纠正：他说"ba-ba"不管是否指你，都热情回应"对！爸爸在这里！"</li><li>照镜子：这个阶段对镜中宝宝极感兴趣(但不知道是自己)</li></ul><p><strong>陌生人焦虑(5-6月)：</strong>见到不熟悉的人哭/躲——正常！不强迫社交，给适应时间。</p>`},
+{icon:"🛡️",title:"安全与Babyproof",content:`<p><strong>即将会移动！必须提前准备：</strong></p><ul><li>地面：清除<3cm的一切小物件(硬币/笔帽/扣子/花生)——窒息头号杀手</li><li>插座：全部贴安全堵头或换安全插座面板</li><li>柜门/抽屉：装儿童安全锁(药品/清洁剂/刀具锁高处)</li><li>桌角：贴防撞条(硅胶材质)</li><li>窗户：限位锁(开启<10cm)</li><li>热水壶/暖水瓶：放宝宝绝对够不到的地方</li></ul><p><strong>爸爸必修课——婴儿海姆立克法：</strong></p><ul><li>Step1：一手固定下巴，让婴儿面朝下趴在你前臂(头低于胸)</li><li>Step2：掌根在肩胛骨之间击背5次(有力但不暴力)</li><li>Step3：翻转面朝上，两指按压胸骨下半部5次</li><li>Step4：检查口腔有无异物吐出→重复直到排出或120到</li></ul>`},
+{icon:"💉",title:"疫苗",content:`<p><strong>4月龄：</strong>脊灰第3剂 + 百白破第2剂</p><p><strong>5月龄：</strong>百白破第3剂</p><p><strong>6月龄：</strong>乙肝第3剂(全程完成) + A群流脑多糖第1剂</p><p><strong>自费强烈推荐：</strong></p><ul><li>手足口EV71疫苗：6月龄起，间隔1月共2剂(手足口重症致死主因)</li><li>流感疫苗：6月龄后每年秋季接种</li><li>肺炎13价(PCV13)：越早越好</li></ul>`}
+]},
+"6m":{title:"6-9个月",sections:[
+{icon:"🍼",title:"辅食全攻略",content:`<p><strong>第一口辅食：高铁婴儿米粉</strong>（不是自磨米粉！缺铁）</p><p><strong>添加顺序与节奏：</strong></p><ul><li>第1周：米粉(1-2勺/次 调成稀糊)每天1次</li><li>第2周：加入蔬菜泥(南瓜→胡萝卜→西兰花→土豆) 每种3天</li><li>第3-4周：加水果泥(苹果→香蕉→牛油果→梨)</li><li>第5-6周：加肉泥(猪肝→鸡肉→牛肉)——铁的最佳来源！</li><li>7月龄后：蛋黄(从1/4开始)→全蛋(8月龄后)</li></ul><p><strong>每天辅食安排(7-8月示例)：</strong></p><ul><li>早7:00 奶 → 10:00 辅食(米粉+菜泥)+奶 → 12:00 奶 → 15:00 辅食(肉泥+果泥)+奶 → 18:00 奶 → 睡前奶</li></ul><p><strong>质地进阶：</strong>稀糊(6月)→厚泥(7月)→细颗粒(8月)→粗颗粒/小块(9月)</p><p><strong>过敏观察：</strong>高致敏食物(鸡蛋/花生/牛奶/鱼/虾/小麦/大豆)不回避！早期小量引入反而降低过敏风险(LEAP/EAT研究)。每种第一次少量(指尖大小)→观察2小时→无皮疹/呕吐/腹泻→逐渐加量。</p>`,controversial:"BLW(Baby-Led Weaning自主进食)vs传统泥糊：BLW让宝宝自己抓食促进精细动作/自我调节。但噎食风险需评估。推荐：混合式(泥+手指食物)，确保坐稳有人全程看护。手指食物形状：条状(拳头长/手指粗)而非圆形块状。"},
+{icon:"😴",title:"睡眠",content:`<p>稳定2次白天小睡(上午1.5h+下午1.5h)。夜间10-12小时连续有可能。</p><p><strong>断夜奶时机(6月龄后可开始)：</strong></p><ul><li>前提：白天奶量+辅食足够，体重正常</li><li>方法1(配方奶)：每晚减少10-20ml→几天后为0→不再给</li><li>方法2(母乳)：每次减少2分钟→缩到2分钟以下→改为拍背安慰</li><li>方法3：爸爸去安慰(没有奶味宝宝更容易接受不吃)——这正是单亲爸爸的"优势"！</li></ul>`},
+{icon:"🌡️",title:"常见疾病",content:`<p><strong>辅食相关问题：</strong></p><ul><li>便秘(>3天无便或干硬)：加高纤食物(西梅泥/火龙果/南瓜)、多饮水、顺时针按摩肚子</li><li>食物过敏：皮疹/荨麻疹/口周红/呕吐/腹泻→停该食物→记录→咨询医生</li></ul><p><strong>感冒(上呼吸道感染)：</strong></p><ul><li>6月龄后开始频繁（正常：1岁内6-8次/年）</li><li>症状：流涕/轻咳/低热/食欲略降</li><li>处理：生理盐水洗鼻+吸鼻器、多喝奶/水、室内加湿50-60%、枕下垫毛巾抬高</li><li>就医信号：持续>10天/高热>39℃/呼吸急促/精神明显差/耳朵疼(拽耳朵哭)</li></ul><p><strong>幼儿急疹(6-12月高发)：</strong>突发高热39-40℃持续3-5天→热退后全身玫瑰色疹→自愈不传染。高热期间退烧即可，出疹不需处理。</p>`},
+{icon:"🏋️",title:"运动发育",content:`<p><strong>里程碑：</strong></p><ul><li>6月：独坐(5-10秒)、双手各握一个玩具</li><li>7月：坐稳、开始前后摇晃(爬行前兆)</li><li>8月：手膝爬行 / 匍匐移动</li><li>9月：扶站、扶走几步</li></ul><p><strong>爸爸训练法：</strong></p><ul><li>引导爬行：宝宝面前30cm放最爱的玩具，用手掌抵住脚底给蹬力</li><li>"隧道爬"：爸爸四肢撑地做隧道让宝宝钻过去(超开心！)</li><li>扶站训练：不需要学步车(反而影响平衡)！让宝宝扶沙发/茶几自行练习</li><li>精细动作(9月关键)：练习钳形抓握——给米泡芙/小溶豆让他拇指+食指夹</li></ul>`},
+{icon:"🗣️",title:"语言与认知",content:`<p><strong>里程碑：</strong></p><ul><li>6-7月：识别常用词("奶奶""灯灯")虽然不会说</li><li>8月：会配合"拜拜"手势、听懂"不行"的语气</li><li>9月：第一个有意义的词可能出现！(最常见是"mama"或"dada")</li></ul><p><strong>促进方法：</strong></p><ul><li>命名一切：吃饭时说"苹果，红色的，甜甜的"；出门说"汽车，嘀嘀"</li><li>手势+语言：边说"再见"边挥手；"给我"时伸手→宝宝学习词-动作配对</li><li>互动绘本时间：每天至少10分钟。这个阶段不需要读完！翻到哪页指着说就行</li><li>减少屏幕：<18月龄零屏幕(WHO建议)。屏幕无法替代面对面互动的语言发展效果</li></ul>`},
+{icon:"💉",title:"疫苗",content:`<p><strong>6月龄：</strong>乙肝第3剂 + A群流脑第1剂</p><p><strong>8月龄：</strong>MR(麻疹-风疹)第1剂 + 乙脑减毒第1剂</p><p><strong>9月龄：</strong>A群流脑第2剂</p><p><strong>自费推荐：</strong>EV71两剂(间隔1月)、每年流感疫苗、肺炎PCV13</p>`}
+]},
+"9m":{title:"9-12个月",sections:[
+{icon:"🍼",title:"喂养",content:`<p>辅食升级为小块/软颗粒。每天2-3次辅食+奶500-600ml。</p><p><strong>手指食物推荐(锻炼自主进食+钳形抓握)：</strong></p><ul><li>条状蒸蔬菜(胡萝卜条/南瓜条/西兰花小朵)</li><li>软水果薄片(香蕉/牛油果/熟梨)</li><li>面食(小蝴蝶面/螺旋面/馒头条)</li><li>蛋白质(撕碎的鸡肉丝/鱼肉小块去刺/豆腐块)</li></ul><p><strong>10月龄训练自己用勺(会很脏但必须经历)：</strong>给一把勺让宝宝自己舀，你另外一把喂——双管齐下。</p><p><strong>杯饮水训练：</strong>每次辅食后用吸管杯给水→目标1岁彻底戒奶瓶(奶瓶持续使用→龋齿+牙齿前突风险)。</p>`},
+{icon:"🌡️",title:"常见问题",content:`<p><strong>走路早晚问题：</strong>正常范围9-18月龄独走。不需要学步车/学步带，反而干扰自然平衡发展。光脚走(室内)是最好的训练。</p><p><strong>挑食/扔食：</strong>9-12月开始出现——正在学习"因果关系"(扔→掉→响→爸爸捡)和"自主选择"。不是不乖！应对：固定食物种类中让他选、掉地上不反应(不捡给反馈)、每餐<30分钟到时间就收。</p><p><strong>分离焦虑peak期：</strong>离开视线就大哭。处理：不偷溜走(加剧不安)→说固定告别语"爸爸去洗碗，马上回来"→真的很快回来几次→逐渐延长。</p>`},
+{icon:"🏋️",title:"运动发育",content:`<p><strong>里程碑：</strong>扶走→独站→第一步(约12月)。每个宝宝时间不同，不攀比！</p><p><strong>帮助第一步：</strong></p><ul><li>扶家具巡航：沿着沙发/茶几走——不要牵手(破坏重心)让他自己扶</li><li>爸爸蹲在1米外伸开手臂"来！来爸爸这里！"——几步的距离慢慢加远</li><li>推推乐(push walker)比坐式学步车好——至少能锻炼腿部力量和平衡</li><li>光脚！光脚！光脚！地面感觉信息对平衡系统发育至关重要</li></ul>`},
+{icon:"🗣️",title:"语言发展",content:`<p><strong>里程碑：</strong>9-12月应出现1-3个有意义的词(mama/baba/奶奶)。能听懂简单指令("给爸爸""拍手")。用食指指物表达需求。</p><p><strong>如果12月龄还没有出现有意义的词：</strong></p><ul><li>不必太焦虑——正常范围很宽(男孩整体偏晚)</li><li>但如果：不看眼、不指东西、不回应名字、对人无兴趣→建议挂发育行为儿科评估</li></ul><p><strong>爸爸能做的（语言爆发前的输入期）：</strong></p><ul><li>每天阅读：从"指认书"(每页一个大图+一个词)开始</li><li>延伸对话：宝宝指着狗→"对！狗狗。大狗狗。汪汪叫。跑得快。"</li><li>唱歌配动作：拍手歌/头肩膝脚趾/如果感到幸福→语言+动作双重输入</li></ul>`},
+{icon:"💉",title:"疫苗",content:`<p><strong>9月龄：</strong>A群流脑第2剂</p><p><strong>12月龄(满1岁)：</strong>水痘第1剂(自费强推) + 甲肝减毒第1剂</p><p><strong>1岁体检(重要)：</strong>体格测量+发育评估+血红蛋白检测(排除缺铁性贫血)+视力初筛</p>`}
+]},
+"12m":{title:"1-2岁",sections:[
+{icon:"🍼",title:"喂养",content:`<p><strong>一日三餐为主，奶为辅(400-500ml/天)。</strong>1岁后可以用全脂纯牛奶替代配方奶。</p><p><strong>断夜奶(如还有)：</strong>1岁是好时机。方法：逐晚稀释(配方奶)/缩短时间(母乳)，用水替代，几天后不再要。</p><p><strong>饮食习惯培养(越早越好)：</strong></p><ul><li>固定餐桌椅+餐具，和家人同桌吃——社交学习进食</li><li>每餐≤30分钟，到时间收掉(不追喂/不看动画喂)</li><li>允许弄脏(自主进食的必经阶段)，用带兜围兜+落地垫</li><li>挑食期(18月龄开始)：不强迫、不大惊小怪、同种营养换形式(不吃菜→菜包/饺子)、新食物反复提供≥15次</li></ul>`,controversial:"'1岁断母乳'vs'继续到2岁+'：WHO建议可持续到2岁，中国部分医生建议1岁断。从营养角度1岁后母乳不再是主要来源但仍有免疫/情感价值。建议：妈妈(如有参与)和宝宝都准备好时自然离乳。"},
+{icon:"🌡️",title:"常见疾病",content:`<p><strong>手足口病(1-3岁高发)：</strong></p><ul><li>症状：口腔疱疹(痛→不吃东西)、手脚红疹/水泡、可能发热</li><li>护理：止痛(扑热息痛)、冷食物缓解口痛(酸奶/冰泥)、防脱水(少量多次喂水/奶)</li><li>就医：高热不退/精神萎靡/肢体抖动/呼吸急促(重症信号!)</li></ul><p><strong>Terrible Twos开始(18月~)：</strong></p><ul><li>频繁发脾气/扔东西/打人/说不</li><li>不是你养坏了！是大脑前额叶(控制情绪)还没发育好</li><li>应对：共情(不否认感受)+设界限(不退让底线)+给选择(不开放性提问)</li><li>具体话术："你想要这个拿不到很生气对吗？但是不能打人。你可以跺跺脚。"</li></ul><p><strong>如厕训练(通常18-36月)：</strong></p><ul><li>准备信号：能保持2h干尿布、对马桶感兴趣、能表达便意、能简单穿脱裤子</li><li>不急！平均完成年龄是2.5-3岁。逼迫适得其反</li><li>方法：读如厕绘本→买小马桶放旁边→固定时间坐(饭后/睡前)→成功了大力表扬→失败了"没关系，下次再试"</li></ul>`},
+{icon:"🏋️",title:"运动",content:`<p><strong>12-18月：</strong>独走稳定→能蹲捡东西→倒退走→上台阶(扶)</p><p><strong>18-24月：</strong>跑(虽然摇晃)→踢球→双脚跳→单脚站片刻</p><p><strong>运动建议(每天至少1小时!)：</strong></p><ul><li>室内：爬沙发靠垫搭的"山"、钻大纸箱隧道、扔球/接球</li><li>户外：推车散步→自己走→跑(不平路面更锻炼平衡)</li><li>有条件：早教运动课(体操/平衡木/蹦床)对大肌肉发展帮助大</li></ul>`},
+{icon:"🗣️",title:"语言爆发期",content:`<p><strong>里程碑：</strong></p><ul><li>12月：1-3词有意义</li><li>15月：5-10词、能指出身体部位</li><li>18月：10-50词(语言爆发起点!)</li><li>24月：50-200+词、两词短句("爸爸抱""要奶奶""车车走")</li></ul><p><strong>如何助推语言爆发：</strong></p><ul><li>延伸法：宝宝说"车"→你说"对，红色的大车，嗖~开过去了"</li><li>不纠正、要重塑：宝宝说"吃包包"→你说"对，吃面包。好吃的面包。"(自然重复正确版)</li><li>每天读书15-20分钟(指读+提问："小兔在哪里？""这是什么颜色？")</li><li>限制屏幕(研究明确：电子屏幕<2岁=语言延迟风险因子)</li></ul><p><strong>需要评估的信号：</strong>18月<5词、24月<50词或无两词句、不用手指指东西。挂发育行为儿科。</p>`},
+{icon:"💉",title:"疫苗",content:`<p><strong>12月龄：</strong>水痘第1剂 + 甲肝减毒第1剂</p><p><strong>18月龄(重要大针!)：</strong>百白破第4剂(加强) + 麻腮风MMR + 甲肝第2剂</p><p><strong>18月龄后每年秋季：</strong>流感疫苗</p><p><strong>24月龄：</strong>乙脑减毒第2剂 + A+C群流脑(加强)</p>`}
+]},
+"24m":{title:"2-3岁",sections:[
+{icon:"🍼",title:"饮食",content:`<p>完全家庭餐。一日三餐+1-2次点心。牛奶/酸奶300-500ml/天。</p><p><strong>营养重点：</strong></p><ul><li>钙：奶制品+豆腐+绿叶菜(每天500-600mg)</li><li>铁：红肉每周3-4次+肝脏每周1次+VC水果促吸收</li><li>锌：牡蛎/牛肉/猪肉/坚果碎</li><li>DHA：每周2次鱼(三文鱼/鳕鱼)</li></ul><p><strong>坚决限制：</strong>蜂蜜(1岁内禁，2岁后少量可)、果汁(糖！建议直接吃水果)、加工零食、碳酸饮料。</p><p><strong>筷子训练：</strong>2-3岁可给训练筷(连体式)尝试。不急，重在兴趣。</p>`},
+{icon:"🌡️",title:"常见问题",content:`<p><strong>夜惊vs噩梦：</strong></p><ul><li>夜惊(Night Terror)：入睡后1-3小时，尖叫/坐起/不认人→别叫醒！确保安全等自己过去(5-20分钟)→第二天不记得</li><li>噩梦：后半夜，醒来哭找大人→抱起安慰"爸爸在，没事了"→能描述怕什么</li></ul><p><strong>入园准备(30-36月)：</strong></p><ul><li>能力目标：能自己吃饭/说出"我要尿尿"/穿脱简单衣服/离开爸爸不过度崩溃</li><li>心理准备：绘本(《我爱幼儿园》系列)→路过幼儿园看小朋友玩→"以后你也可以和他们一起玩"</li><li>分离练习：从15分钟逐渐延长到半天</li></ul><p><strong>性教育启蒙（2岁开始!）：</strong></p><ul><li>用正确名称称呼身体部位(阴茎/阴部而非小鸡鸡等)</li><li>教"泳衣规则"：泳衣盖住的地方只有自己和医生(爸爸帮洗)可以看/碰</li><li>任何人说"这是秘密不要告诉爸爸"=必须告诉爸爸</li></ul>`},
+{icon:"🏋️",title:"运动",content:`<p><strong>2-3岁：</strong>双脚跳/单脚跳/骑三轮车/单脚站5秒/接大球/爬攀架</p><p><strong>精细动作：</strong>穿珠子/用安全剪刀剪纸/画圆+十字/捏橡皮泥搓圆/拧瓶盖</p><p><strong>每天至少1.5小时活动(WHO建议)：</strong>户外跑跳为主。不需要"运动课"——游乐场+公园足够。</p>`},
+{icon:"🗣️",title:"语言与认知",content:`<p><strong>里程碑：</strong>200-1000+词汇、3-5词句子、能讲简短故事、问"为什么"开始(3岁)。</p><p><strong>认知发展训练：</strong></p><ul><li>颜色分类/形状配对/数字1-10(对应实物数)</li><li>简单桌游(记忆翻牌/钓鱼)——学规则/轮流/等待</li><li>假想游戏(过家家/医生/厨房)——社交认知发展核心</li><li>英语启蒙：儿歌+动画(每天<20分钟)+日常简单词("这是apple")</li></ul>`},
+{icon:"💉",title:"疫苗与入园",content:`<p><strong>24月龄：</strong>乙脑减毒第2剂 + A+C群流脑多糖</p><p><strong>36月龄：</strong>A+C群流脑多糖(加强)</p><p><strong>入园前(必须)：</strong>完成国家免疫规划所有剂次的接种证明 + 入园体检(含血常规/肝功/身高体重/视力/口腔)</p><p>每年秋季接种流感疫苗(推荐)</p>`}
+]}};
+
+// Milestones
+const MS=[{month:0,title:'卡介苗+乙肝第1剂',cat:'疫苗'},{month:1,title:'乙肝第2剂',cat:'疫苗'},{month:2,title:'脊灰IPV第1剂',cat:'疫苗'},{month:3,title:'脊灰第2剂+百白破第1剂',cat:'疫苗'},{month:4,title:'脊灰第3剂+百白破第2剂',cat:'疫苗'},{month:5,title:'百白破第3剂',cat:'疫苗'},{month:6,title:'乙肝第3剂+A群流脑+EV71(自费)',cat:'疫苗'},{month:8,title:'MR第1剂+乙脑减毒第1剂',cat:'疫苗'},{month:9,title:'A群流脑第2剂',cat:'疫苗'},{month:12,title:'水痘第1剂+甲肝第1剂',cat:'疫苗'},{month:18,title:'百白破第4剂+MMR+甲肝第2剂',cat:'疫苗'},{month:24,title:'乙脑第2剂+A+C群流脑',cat:'疫苗'},{month:36,title:'入园体检+A+C群流脑多糖',cat:'疫苗'},
+{month:1,title:'观察社交性微笑',cat:'发育'},{month:3,title:'追视180°+抬头90°',cat:'发育'},{month:4,title:'翻身能力',cat:'发育'},{month:6,title:'独坐评估',cat:'发育'},{month:9,title:'爬行+扶站',cat:'发育'},{month:12,title:'独走评估',cat:'发育'},{month:18,title:'语言爆发观察(10+词)',cat:'发育'},
+{month:6,title:'开始添加辅食',cat:'喂养'},{month:7,title:'引入手指食物',cat:'喂养'},{month:9,title:'杯饮水训练',cat:'喂养'},{month:12,title:'断夜奶+戒奶瓶',cat:'喂养'},
+{month:5,title:'学海姆立克急救法',cat:'安全'},{month:6,title:'全面Babyproof',cat:'安全'},{month:10,title:'开始刷牙',cat:'护理'},{month:12,title:'第一次牙科检查',cat:'护理'},
+{month:18,title:'如厕训练观察信号',cat:'成长'},{month:24,title:'如厕训练开始',cat:'成长'},{month:30,title:'幼儿园调研报名',cat:'入学'},{month:36,title:'正式入园',cat:'入学'}];
+
+// Timer config
+const TIMER_CONFIG=[
+  {type:'bottle',icon:'🍼',label:'喂奶',action:'喂奶',suggestMin:180,suggest:'3小时'},
+  {type:'breastfeed',icon:'🤱',label:'母乳',action:'喂奶',suggestMin:150,suggest:'2.5小时'},
+  {type:'diaper',icon:'🧷',label:'换尿布',action:'换尿布',suggestMin:180,suggest:'3小时'},
+  {type:'sleep',icon:'😴',label:'睡觉',action:'哄睡',suggestMin:120,suggest:'2小时清醒'}
+];
+
+const app=createApp({setup(){
+  const toasts=ref([]);
+  function toast(msg,w=false,icon='✅'){const t={msg,w,icon:w?'⚠️':icon};toasts.value.push(t);setTimeout(()=>{const i=toasts.value.indexOf(t);if(i>=0)toasts.value.splice(i,1);},2500);}
+
+  // Data
+  const baby=ref({name:'',gender:'',birthday:''});
+  const records=ref([]);
+  const msDone=ref({});
+  const apiKey=ref('sk-7a5219ecd8094bbe9bfe8aaebd6ea74f');
+
+  onMounted(()=>{
+    const s=localStorage.getItem('bg3');
+    if(s){const d=JSON.parse(s);baby.value=d.baby||baby.value;records.value=d.records||[];msDone.value=d.msDone||{};}
+    const k=localStorage.getItem('bg3_key');if(k)apiKey.value=k;
+    // Start timer interval
+    timerInterval=setInterval(updateTimers,30000);updateTimers();
+    // Request notification
+    if('Notification' in window && Notification.permission==='default') showNotifBanner.value=true;
+  });
+  let timerInterval;
+  onUnmounted(()=>clearInterval(timerInterval));
+
+  function saveData(){localStorage.setItem('bg3',JSON.stringify({baby:baby.value,records:records.value,msDone:msDone.value}));}
+  function saveKey(){localStorage.setItem('bg3_key',apiKey.value);toast('Key已保存');}
+  function exportData(){const blob=new Blob([JSON.stringify({baby:baby.value,records:records.value,msDone:msDone.value,date:new Date().toISOString()},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`育儿备份_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('备份已下载');}
+  function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.baby)baby.value=d.baby;if(d.records)records.value=d.records;if(d.msDone)msDone.value=d.msDone;saveData();toast('导入成功');}catch(e){toast('格式错误',true);}};r.readAsText(f);}
+
+  // Baby computed
+  const age=computed(()=>{if(!baby.value.birthday)return{display:'--',months:0,totalDays:0};const b=new Date(baby.value.birthday),n=new Date(),d=Math.floor((n-b)/864e5),m=Math.floor(d/30.44),y=Math.floor(m/12),rm=m%12;return{display:y>0?y+'岁'+rm+'月':m>0?m+'个月':d+'天',months:m,totalDays:d};});
+  const constellation=computed(()=>{if(!baby.value.birthday)return'--';const d=new Date(baby.value.birthday),m=d.getMonth()+1,day=d.getDate();const s=[[20,'水瓶'],[19,'双鱼'],[21,'白羊'],[20,'金牛'],[21,'双子'],[22,'巨蟹'],[22,'狮子'],[23,'处女'],[23,'天秤'],[23,'天蝎'],[22,'射手'],[22,'摩羯']];const idx=day>=s[m-1][0]?m-1:(m-2+12)%12;return s[idx][1]+'座';});
+  const zodiac=computed(()=>{if(!baby.value.birthday)return'--';return['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'][(new Date(baby.value.birthday).getFullYear()-4)%12];});
+
+  // Knowledge
+  const kSel=ref('0m');
+  const kStages=Object.entries(K).map(([k,v])=>({key:k,label:v.title}));
+  const kData=computed(()=>K[kSel.value]);
+
+  // Milestones
+  const msFilter=ref('all');
+  const msAll=computed(()=>MS.map((m,i)=>({...m,id:i,done:!!msDone.value[i],doneAt:msDone.value[i]?.time,ageLabel:m.month<12?m.month+'月龄':Math.floor(m.month/12)+'岁'+(m.month%12?m.month%12+'月':'')})).sort((a,b)=>a.month-b.month));
+  const msFiltered=computed(()=>{if(msFilter.value==='done')return msAll.value.filter(m=>m.done);if(msFilter.value==='pending')return msAll.value.filter(m=>!m.done);return msAll.value;});
+  const msDoneCount=computed(()=>msAll.value.filter(m=>m.done).length);
+  const msProgress=computed(()=>msAll.value.length?Math.round(msDoneCount.value/msAll.value.length*100):0);
+  function toggleMs(id){if(msDone.value[id])delete msDone.value[id];else msDone.value[id]={time:new Date().toISOString()};saveData();toast(msDone.value[id]?'已完成!':'已撤销',!msDone.value[id]);}
+  function catTag(c){return{'疫苗':'tag-red','发育':'tag-blue','喂养':'tag-orange','安全':'tag-yellow','护理':'tag-green','成长':'tag-blue','入学':'tag-green'}[c]||'tag-blue';}
+
+  // Daily records
+  const taskTypes=[
+    {key:'bottle',icon:'🍼',label:'奶瓶',bg:'#EDF3FF'},
+    {key:'breastfeed',icon:'🤱',label:'母乳',bg:'#FDE8E8'},
+    {key:'diaper',icon:'🧷',label:'换尿布',bg:'#FFF8EB'},
+    {key:'sleep',icon:'😴',label:'睡觉',bg:'#F3EEFF'},
+    {key:'wake',icon:'☀️',label:'醒来',bg:'#FFFDE7'},
+    {key:'bath',icon:'🛁',label:'洗澡',bg:'#E6FFFA'},
+    {key:'food',icon:'🥣',label:'辅食',bg:'#EDFBF3'},
+    {key:'medicine',icon:'💊',label:'用药',bg:'#FDE8E8'},
+    {key:'play',icon:'🎮',label:'活动',bg:'#F0F4FF'},
+    {key:'poop',icon:'💩',label:'大便',bg:'#FFF8EB'},
+  ];
+  const modal=ref({show:false,type:'',time:'',note:'',title:''});
+  function openModal(type){const now=new Date();const t=now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0')+'-'+now.getDate().toString().padStart(2,'0')+'T'+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');modal.value={show:true,type,time:t,note:'',title:getLabel(type)+' 打卡'};}
+  function confirmRecord(){records.value.push({type:modal.value.type,time:new Date(modal.value.time).toISOString(),note:modal.value.note,id:Date.now()});saveData();modal.value.show=false;toast(getLabel(modal.value.type)+' 已记录');updateTimers();}
+  const todayStr=new Date().toISOString().slice(0,10);
+  const viewDate=ref(todayStr);
+  const dayRecords=computed(()=>records.value.filter(r=>r.time.startsWith(viewDate.value)).sort((a,b)=>new Date(b.time)-new Date(a.time)));
+  function delRecord(r){const i=records.value.indexOf(r);if(i>=0)records.value.splice(i,1);saveData();toast('已删除',true);}
+  function moveDay(n){const d=new Date(viewDate.value);d.setDate(d.getDate()+n);viewDate.value=d.toISOString().slice(0,10);}
+  function getIcon(t){return(taskTypes.find(x=>x.key===t)||{}).icon||'📌';}
+  function getLabel(t){return(taskTypes.find(x=>x.key===t)||{}).label||t;}
+  function getDailyCount(t){return dayRecords.value.filter(r=>r.type===t).length;}
+
+  // Timers & Reminders
+  const showNotifBanner=ref(false);
+  const activeTimers=ref([]);
+  function requestNotif(){if('Notification' in window)Notification.requestPermission().then(p=>{showNotifBanner.value=false;if(p==='granted')toast('通知已开启');});}
+  function updateTimers(){
+    const now=Date.now();
+    activeTimers.value=TIMER_CONFIG.map(cfg=>{
+      const lastRecord=records.value.filter(r=>r.type===cfg.type||(['bottle','breastfeed'].includes(cfg.type)&&['bottle','breastfeed'].includes(r.type))).sort((a,b)=>new Date(b.time)-new Date(a.time))[0];
+      if(!lastRecord)return{...cfg,elapsed:'--:--',overdue:false};
+      const diffMin=Math.floor((now-new Date(lastRecord.time).getTime())/60000);
+      const h=Math.floor(diffMin/60),m=diffMin%60;
+      const elapsed=h>0?h+'h'+m.toString().padStart(2,'0')+'m':m+'m';
+      const overdue=diffMin>=cfg.suggestMin;
+      if(overdue&&'Notification' in window&&Notification.permission==='granted'){
+        // Only notify once per overdue cycle
+        const nKey='notif_'+cfg.type+'_'+lastRecord.id;
+        if(!window[nKey]){window[nKey]=true;new Notification('育儿提醒 🍼',{body:`距离上次${cfg.label}已经${elapsed}，该${cfg.action}了！`,icon:'🍼'});}
+      }
+      return{...cfg,elapsed,overdue};
+    }).filter(t=>t.elapsed!=='--:--');
+  }
+
+  // Week reminders
+  const weekReminders=computed(()=>{
+    if(!baby.value.birthday)return[];
+    const m=age.value.months;
+    const reminders=[];
+    // Vaccine reminders
+    MS.filter(ms=>ms.cat==='疫苗'&&ms.month>=m-0.5&&ms.month<=m+1&&!msDone.value[MS.indexOf(ms)]).forEach(ms=>{
+      reminders.push({icon:'💉',title:ms.title,detail:`宝宝${ms.month}月龄应接种，请尽快预约社区卫生中心`,tag:'疫苗',tagClass:'tag-red'});
+    });
+    // Development reminders
+    MS.filter(ms=>ms.cat==='发育'&&ms.month>=m-0.5&&ms.month<=m+1&&!msDone.value[MS.indexOf(ms)]).forEach(ms=>{
+      reminders.push({icon:'🌱',title:'观察：'+ms.title,detail:'本周留意宝宝是否出现相关发育表现',tag:'发育',tagClass:'tag-blue'});
+    });
+    // Feeding milestones
+    MS.filter(ms=>ms.cat==='喂养'&&ms.month>=m-0.5&&ms.month<=m+1&&!msDone.value[MS.indexOf(ms)]).forEach(ms=>{
+      reminders.push({icon:'🍼',title:ms.title,detail:'该阶段喂养重要节点',tag:'喂养',tagClass:'tag-orange'});
+    });
+    // Age-based general reminders
+    if(m>=3&&m<4)reminders.push({icon:'📋',title:'准备翻身安全措施',detail:'宝宝即将学会翻身，睡眠区清除多余物品',tag:'安全',tagClass:'tag-yellow'});
+    if(m>=5&&m<6)reminders.push({icon:'🥣',title:'准备辅食工具',detail:'下月将开始辅食，购买米粉/研磨碗/围兜/吸盘碗',tag:'准备',tagClass:'tag-green'});
+    if(m>=11&&m<12)reminders.push({icon:'🎂',title:'即将满1岁！',detail:'安排1岁体检(血红蛋白+发育评估)、预约水痘+甲肝疫苗',tag:'体检',tagClass:'tag-blue'});
+    if(m>=29&&m<31)reminders.push({icon:'🏫',title:'幼儿园调研',detail:'开始了解周边幼儿园，准备入园材料',tag:'入学',tagClass:'tag-green'});
+    return reminders;
+  });
+
+  // Stats
+  const statView=ref('chart');const chartEl=ref(null);let chartInst=null;
+  const allEvents=computed(()=>{let evts=records.value.map(r=>({type:r.type,title:getLabel(r.type)+(r.note?' · '+r.note:''),time:r.time,category:getLabel(r.type)}));Object.entries(msDone.value).forEach(([i,info])=>{const m=MS[i];if(m)evts.push({type:'milestone',title:m.title,time:info.time,category:m.cat});});return evts.sort((a,b)=>new Date(b.time)-new Date(a.time));});
+  function evtColor(type){const map={bottle:'#63B3ED',breastfeed:'#FC8181',diaper:'#F6AD55',sleep:'#B794F4',wake:'#F6E05E',bath:'#4FD1C5',food:'#68D391',medicine:'#FC8181',play:'#63B3ED',poop:'#F6AD55',milestone:'#E8505B'};return map[type]||'#A0AEC0';}
+  watch(statView,v=>{if(v==='chart')nextTick(renderChart);});
+  onMounted(()=>setTimeout(()=>{if(statView.value==='chart')renderChart();},500));
+  function renderChart(){if(!chartEl.value)return;if(chartInst)chartInst.destroy();const last7=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);last7.push(d.toISOString().slice(0,10));}const types=taskTypes.slice(0,6);const datasets=types.map(t=>({label:t.label,data:last7.map(day=>records.value.filter(r=>r.type===t.key&&r.time.startsWith(day)).length),backgroundColor:evtColor(t.key),borderRadius:3}));chartInst=new Chart(chartEl.value,{type:'bar',data:{labels:last7.map(d=>d.slice(5)),datasets},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#F0F3F7'}}}}});}
+
+  // FAQ integrated into knowledge - no separate section needed
+
+  // AI Chat
+  const msgs=ref([]);const chatInput=ref('');const chatLoading=ref(false);const chatBox=ref(null);
+  const quickQ=['宝宝夜奶几次正常？','辅食过敏怎么办？','怎么应对肠绞痛？','单亲爸爸怎么不崩溃？'];
+  async function sendChat(){
+    if(!chatInput.value.trim()||chatLoading.value)return;
+    const msg=chatInput.value.trim();msgs.value.push({role:'user',content:msg});chatInput.value='';chatLoading.value=true;
+    msgs.value.push({role:'assistant',content:'',loading:true});
+    nextTick(()=>{if(chatBox.value)chatBox.value.scrollTop=chatBox.value.scrollHeight;});
+    const sys=`你是专业温暖的育儿顾问，帮助新手单亲爸爸解答0-3岁育儿问题。要求：1.引用权威来源(AAP/WHO/中国指南) 2.给具体可执行建议 3.温暖鼓励 4.争议标注 5.危险信号明确指出。宝宝：${baby.value.name||'未命名'}，${age.value.display}，${baby.value.gender==='male'?'男':'女'}。`;
+    try{
+      const resp=await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey.value},body:JSON.stringify({model:'qwen-plus',messages:[{role:'system',content:sys},...msgs.value.filter(m=>!m.loading).map(m=>({role:m.role,content:m.content}))],stream:true})});
+      const reader=resp.body.getReader();const dec=new TextDecoder();let ai=msgs.value[msgs.value.length-1];ai.loading=false;
+      while(true){const{done,value}=await reader.read();if(done)break;const chunk=dec.decode(value);chunk.split('\n').filter(l=>l.startsWith('data:')).forEach(line=>{const d=line.slice(5).trim();if(d==='[DONE]')return;try{ai.content+=(JSON.parse(d).choices?.[0]?.delta?.content||'');}catch(e){}});nextTick(()=>{if(chatBox.value)chatBox.value.scrollTop=chatBox.value.scrollHeight;});}
+    }catch(err){msgs.value[msgs.value.length-1]={role:'assistant',content:'请求失败：'+err.message};}
+    chatLoading.value=false;
+  }
+
+  // Utils
+  function fmtDate(iso){return iso?new Date(iso).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}):'';}
+  function fmtTime(iso){return iso?new Date(iso).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}):'';}
+  function fmtDT(iso){return iso?new Date(iso).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';}
+
+  return{toasts,toast,baby,age,constellation,zodiac,records,msDone,apiKey,saveData,saveKey,exportData,importData,
+    kSel,kStages,kData,
+    msFilter,msAll,msFiltered,msDoneCount,msProgress,toggleMs,catTag,
+    taskTypes,modal,openModal,confirmRecord,todayStr,viewDate,dayRecords,delRecord,moveDay,getIcon,getLabel,getDailyCount,
+    showNotifBanner,requestNotif,activeTimers,weekReminders,
+    statView,chartEl,allEvents,evtColor,
+    msgs,chatInput,chatLoading,chatBox,quickQ,sendChat,
+    fmtDate,fmtTime,fmtDT};
+}});
+app.mount('#app');
+</script>
+</body>
+</html>
