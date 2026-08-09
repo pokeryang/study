@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>扑克的书房 · The Study</title>
+<style>
+  /* ============ 基础 ============ */
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --gold:#d9b45b;
+    --gold-hi:#f6e4a8;
+    --gold-dim:#8d7132;
+    --oak:#3a2418;
+    --oak-hi:#5b3a26;
+    --oak-lo:#1d1109;
+    --ink:#0c0906;
+    --parch:#e8dcc0;
+    --candle:#ffb457;
+  }
+  html,body{height:100%}
+  body{
+    background:var(--ink);
+    color:var(--parch);
+    font-family:Georgia,"Times New Roman","Songti SC","STSong","SimSun",serif;
+    overflow:hidden;
+  }
+
+  /* ============ 房间 ============ */
+  .room{
+    position:fixed;inset:0;
+    perspective:1600px;
+    background:
+      radial-gradient(120% 90% at 50% 8%, rgba(120,86,40,.30) 0%, rgba(30,20,12,.55) 42%, rgba(8,6,4,.94) 78%),
+      linear-gradient(#150e08, #0b0805 60%, #070504);
+    overflow:hidden;
+  }
+  /* 墙面石纹 */
+  .room::before{
+    content:"";position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.014) 0 2px, transparent 2px 140px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 96px);
+    mix-blend-mode:overlay;pointer-events:none;
+  }
+  /* 地面 */
+  .floor{
+    position:absolute;left:0;right:0;bottom:0;height:26vh;
+    background:
+      linear-gradient(#0a0705 0%, #140d07 40%, #1b1209 100%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.5) 0 1px, transparent 1px 90px);
+    box-shadow:inset 0 30px 60px rgba(0,0,0,.9);
+  }
+  .floor::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(60% 120% at 50% -10%, rgba(255,178,90,.14), transparent 70%);
+  }
+
+  /* ============ 哥特拱窗 + 月光 ============ */
+  .window{
+    position:absolute;top:4vh;left:50%;transform:translateX(-50%);
+    width:min(300px,26vw);height:min(430px,44vh);
+    border-radius:50% 50% 6px 6px / 34% 34% 4px 4px;
+    background:linear-gradient(180deg, rgba(150,190,225,.20), rgba(70,105,150,.10) 55%, rgba(30,45,70,.05));
+    box-shadow:0 0 90px 30px rgba(140,180,225,.09), inset 0 0 40px rgba(180,210,240,.10);
+    opacity:.85;
+  }
+  .window::before{ /* 窗棂 */
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:
+      repeating-linear-gradient(90deg, rgba(20,14,9,.85) 0 4px, transparent 4px 34%),
+      repeating-linear-gradient(0deg, rgba(20,14,9,.85) 0 4px, transparent 4px 22%);
+    mix-blend-mode:multiply;
+  }
+  .window::after{ /* 石框 */
+    content:"";position:absolute;inset:-12px;border-radius:inherit;
+    border:12px solid #241811;filter:brightness(.9);
+  }
+  .moonbeam{
+    position:absolute;top:6vh;left:50%;
+    width:min(360px,32vw);height:70vh;
+    transform:translateX(-50%) rotate(6deg);transform-origin:top center;
+    background:linear-gradient(rgba(175,205,235,.13), rgba(175,205,235,.03) 55%, transparent 85%);
+    filter:blur(10px);pointer-events:none;
+  }
+
+  /* ============ 漂浮蜡烛 ============ */
+  .candle{position:absolute;pointer-events:none;animation:bob 7s ease-in-out infinite}
+  .candle .wax{
+    width:9px;border-radius:3px;
+    background:linear-gradient(#f3e6cd,#cbb894 60%,#9c8768);
+    box-shadow:0 0 14px rgba(255,190,110,.5);
+    margin:0 auto;
+  }
+  .candle .flame{
+    width:9px;height:16px;margin:0 auto -3px;border-radius:50% 50% 45% 45%;
+    background:radial-gradient(circle at 50% 72%, #fff6d8 0 18%, var(--candle) 45%, rgba(255,120,30,.75) 72%, transparent 78%);
+    filter:blur(.4px);
+    animation:flicker 1.5s ease-in-out infinite;
+  }
+  .candle .halo{
+    position:absolute;left:50%;top:-26px;transform:translateX(-50%);
+    width:110px;height:110px;border-radius:50%;
+    background:radial-gradient(circle, rgba(255,176,88,.20), transparent 68%);
+    animation:pulse 3.4s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+  @keyframes flicker{
+    0%,100%{transform:scaleY(1) scaleX(1);opacity:.95}
+    30%{transform:scaleY(1.14) scaleX(.92);opacity:1}
+    55%{transform:scaleY(.93) scaleX(1.06);opacity:.88}
+    75%{transform:scaleY(1.07) scaleX(.97);opacity:.97}
+  }
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ============ 尘埃 ============ */
+  .mote{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,224,170,.9),rgba(255,200,130,0) 70%);
+    pointer-events:none;animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{transform:translate(0,0);opacity:0}
+    12%{opacity:.85}
+    88%{opacity:.5}
+    100%{transform:translate(var(--dx),var(--dy));opacity:0}
+  }
+
+  /* ============ 标题 ============ */
+  .masthead{
+    position:relative;z-index:5;text-align:center;padding:22px 0 6px;
+  }
+  .masthead h1{
+    font-size:clamp(20px,2.5vw,32px);font-weight:400;letter-spacing:.34em;
+    background:linear-gradient(#fff2cd,var(--gold) 45%,#a37f30);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 18px rgba(217,180,91,.28);
+  }
+  .masthead .sub{
+    margin-top:7px;font-size:11px;letter-spacing:.42em;color:#a08a5e;text-transform:uppercase;
+  }
+  .crest{display:block;margin:0 auto 6px}
+
+  /* ============ 分类铜牌 ============ */
+  .plaques{
+    position:relative;z-index:5;display:flex;gap:10px;justify-content:center;
+    margin:12px 0 8px;flex-wrap:wrap;
+  }
+  .plaque{
+    font-family:inherit;font-size:12px;letter-spacing:.16em;cursor:pointer;
+    padding:7px 17px;border-radius:3px;color:#e3cd93;
+    background:linear-gradient(#4a3720,#2c2013);
+    border:1px solid #6a5228;
+    box-shadow:0 1px 0 rgba(255,224,160,.18) inset,0 3px 8px rgba(0,0,0,.6);
+    transition:.25s;
+  }
+  .plaque:hover{color:#fff3d2;border-color:var(--gold);box-shadow:0 0 14px rgba(217,180,91,.35)}
+  .plaque.on{
+    background:linear-gradient(#7a5c26,#4a3617);color:#fff6dc;border-color:var(--gold-hi);
+    box-shadow:0 0 18px rgba(217,180,91,.45)
+  }
+
+  /* ============ 书架 ============ */
+  .bookcase{
+    position:relative;z-index:4;
+    width:fit-content;min-width:min(690px,90vw);max-width:94vw;
+    margin:6px auto 14vh;
+    padding:14px 26px 8px;
+    background:
+      linear-gradient(#2a1a10,#1a1008 70%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 3px, transparent 3px 26px);
+    border:2px solid #150c06;
+    border-radius:8px 8px 4px 4px;
+    box-shadow:
+      0 -2px 0 rgba(255,200,130,.10) inset,
+      0 40px 90px rgba(0,0,0,.85),
+      0 0 0 8px rgba(15,9,5,.55);
+  }
+  .bookcase::before{ /* 顶部檐口 */
+    content:"";position:absolute;left:-14px;right:-14px;top:-16px;height:16px;
+    background:linear-gradient(#5c3d26,#2a1a10);
+    border-radius:4px 4px 0 0;
+    box-shadow:0 -1px 0 rgba(255,214,150,.20) inset,0 6px 14px rgba(0,0,0,.7);
+  }
+  .shelf{position:relative;margin-bottom:11px}
+  .books{
+    display:flex;align-items:flex-end;justify-content:center;gap:5px;
+    min-height:206px;padding:0 10px;
+    /* 架内暗部 + 一点烛光回照 */
+    background:
+      radial-gradient(120% 90% at 50% 108%, rgba(214,158,74,.10), transparent 62%),
+      linear-gradient(180deg, rgba(0,0,0,.48), rgba(0,0,0,.08) 42%, transparent);
+  }
+  .board{ /* 隔板 */
+    height:13px;border-radius:2px;
+    background:linear-gradient(#6b4728 0%, #432c19 42%, #22150c 100%);
+    box-shadow:
+      0 -1px 0 rgba(255,215,150,.22) inset,
+      0 5px 12px rgba(0,0,0,.8);
+    position:relative;
+  }
+  .board::after{ /* 铜条 */
+    content:"";position:absolute;left:4%;right:4%;top:-2px;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(217,180,91,.55),transparent);
+  }
+
+  /* ============ 书脊 ============ */
+  .spine{
+    position:relative;flex:0 0 auto;cursor:pointer;
+    border-radius:2px 4px 4px 2px;
+    display:flex;align-items:center;justify-content:center;
+    transform-origin:bottom center;
+    transition:transform .42s cubic-bezier(.2,.8,.25,1), box-shadow .42s, filter .42s;
+    box-shadow:
+      2px 0 5px rgba(0,0,0,.6),
+      inset -3px 0 6px rgba(0,0,0,.45),
+      inset 3px 0 5px rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .spine::before{ /* 书脊上下金环 */
+    content:"";position:absolute;left:2px;right:2px;top:11%;height:26%;
+    border-top:1px solid rgba(217,180,91,.5);
+    border-bottom:1px solid rgba(217,180,91,.5);
+    opacity:.55;pointer-events:none;
+  }
+  .spine::after{ /* 皮革光泽 */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg, rgba(255,255,255,.10) 0 12%, transparent 30% 72%, rgba(0,0,0,.35) 100%);
+  }
+  .spine .label{
+    writing-mode:vertical-rl;text-orientation:mixed;
+    font-size:12.5px;letter-spacing:.06em;line-height:1.05;
+    color:#f0dda8;white-space:nowrap;
+    text-shadow:0 1px 1px rgba(0,0,0,.85), 0 0 8px rgba(217,180,91,.25);
+    max-height:88%;
+    padding:4px 0;
+  }
+  .spine:hover{
+    transform:translateY(-16px) rotateZ(-3.5deg) scale(1.03);
+    filter:brightness(1.22);
+    box-shadow:2px 0 5px rgba(0,0,0,.6), 0 14px 30px rgba(0,0,0,.75), 0 0 26px rgba(217,180,91,.42);
+    z-index:3;
+  }
+  .spine.dim{opacity:.16;filter:grayscale(.7) brightness(.6);pointer-events:none}
+  .spine.taken{opacity:0;transition:opacity .18s}
+
+  /* ============ 讲桌 / 前景 ============ */
+  .desk{
+    position:absolute;left:0;right:0;bottom:0;height:12vh;z-index:6;
+    background:linear-gradient(#2b1c11,#150d07 70%,#0a0604);
+    box-shadow:0 -14px 40px rgba(0,0,0,.85), 0 -1px 0 rgba(255,206,140,.14) inset;
+  }
+  .desk::before{
+    content:"";position:absolute;left:0;right:0;top:0;height:3px;
+    background:linear-gradient(90deg,transparent,rgba(217,180,91,.35),transparent);
+  }
+  .hint{
+    position:absolute;left:0;right:0;bottom:4.4vh;z-index:8;
+    text-align:center;font-size:11.5px;letter-spacing:.24em;color:#8e7746;
+    text-shadow:0 1px 6px #000;pointer-events:none;
+  }
+
+  /* ============ 舞台（取书 / 开书） ============ */
+  .stage{
+    position:fixed;inset:0;z-index:60;display:none;
+    align-items:center;justify-content:center;
+    perspective:2200px;
+  }
+  .stage.on{display:flex}
+  .veil{
+    position:absolute;inset:0;opacity:0;transition:opacity .7s;
+    background:radial-gradient(60% 60% at 50% 45%, rgba(60,42,20,.62), rgba(4,3,2,.94) 75%);
+    backdrop-filter:blur(3px);
+  }
+  .stage.on .veil{opacity:1}
+
+  .book{
+    position:relative;transform-style:preserve-3d;
+    width:340px;height:470px;
+    transition:transform .82s cubic-bezier(.22,.9,.24,1), width .82s cubic-bezier(.22,.9,.24,1), height .82s cubic-bezier(.22,.9,.24,1);
+    will-change:transform,width,height;
+  }
+  /* 内页（书页/内容） */
+  .spread{
+    position:absolute;inset:0;border-radius:4px;
+    background:linear-gradient(#efe6cf,#dccfb0);
+    box-shadow:0 34px 90px rgba(0,0,0,.9), 0 0 0 2px #2a1c10, 0 0 60px rgba(217,180,91,.16);
+    opacity:0;transition:opacity .5s .28s;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .book.open .spread{opacity:1}
+  .spread .bar{
+    flex:0 0 auto;display:flex;align-items:center;gap:10px;
+    padding:9px 12px;
+    background:linear-gradient(#3b2716,#241709);
+    border-bottom:2px solid #6a5228;
+    color:#e9d5a1;
+  }
+  .spread .bar .t{
+    flex:1;min-width:0;font-size:13.5px;letter-spacing:.1em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .spread .bar .t small{display:block;font-size:10.5px;color:#a08a5e;letter-spacing:.06em;margin-top:2px}
+  .bbtn{
+    font-family:inherit;font-size:11.5px;letter-spacing:.1em;cursor:pointer;white-space:nowrap;
+    padding:6px 12px;border-radius:3px;color:#f0dda8;
+    background:linear-gradient(#5a4222,#33240f);border:1px solid #7a5f2b;
+    transition:.2s;
+  }
+  .bbtn:hover{color:#fff6dc;border-color:var(--gold-hi);box-shadow:0 0 12px rgba(217,180,91,.4)}
+  .paper{position:relative;flex:1;min-height:0;background:#f4eeda}
+  .paper iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+  .gutter{ /* 书脊中缝阴影 */
+    position:absolute;left:50%;top:0;bottom:0;width:46px;transform:translateX(-50%);
+    background:linear-gradient(90deg,transparent,rgba(60,40,18,.20),rgba(60,40,18,.30),rgba(60,40,18,.20),transparent);
+    pointer-events:none;opacity:.55;
+  }
+  .loading{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;
+    background:linear-gradient(#efe6cf,#e0d3b4);color:#6b5528;
+    font-size:12.5px;letter-spacing:.2em;
+  }
+  .loading.hide{display:none}
+  .loading .ring{
+    width:34px;height:34px;border-radius:50%;
+    border:2px solid rgba(140,110,50,.25);border-top-color:#9c7c34;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading .fb{margin-top:4px}
+
+  /* 封面 */
+  .cover{
+    position:absolute;inset:0;border-radius:3px 6px 6px 3px;
+    transform-origin:left center;transform-style:preserve-3d;
+    transition:transform .95s cubic-bezier(.36,.72,.2,1), box-shadow .6s;
+    box-shadow:0 30px 70px rgba(0,0,0,.85), inset 0 0 60px rgba(0,0,0,.35);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    padding:26px;text-align:center;backface-visibility:hidden;
+  }
+  .book.open .cover{transform:rotateY(-166deg);box-shadow:-20px 24px 60px rgba(0,0,0,.7)}
+  .cover .frame{
+    position:absolute;inset:14px;border:1px solid rgba(217,180,91,.55);border-radius:2px;
+    box-shadow:inset 0 0 0 4px rgba(0,0,0,.18), inset 0 0 0 5px rgba(217,180,91,.22);
+    pointer-events:none;
+  }
+  .cover .ct{
+    font-size:20px;line-height:1.5;letter-spacing:.14em;
+    background:linear-gradient(#fff3d0,var(--gold) 52%,#9c7a2c);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 1px 0 rgba(0,0,0,.4);
+  }
+  .cover .cs{font-size:11.5px;letter-spacing:.2em;color:rgba(240,221,168,.72)}
+  .cover .rule{width:52px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  /* 书页厚度 */
+  .edge{
+    position:absolute;top:6px;bottom:6px;right:-7px;width:9px;border-radius:0 3px 3px 0;
+    background:repeating-linear-gradient(180deg,#efe6cf 0 2px,#cdbf9c 2px 4px);
+    box-shadow:2px 0 6px rgba(0,0,0,.55);
+  }
+  .book.open .edge{opacity:0;transition:opacity .3s}
+
+  /* 翻页光片 */
+  .flip{
+    position:absolute;top:0;bottom:0;left:50%;width:50%;
+    transform-origin:left center;pointer-events:none;
+    background:linear-gradient(90deg,rgba(255,250,235,.95),rgba(226,214,186,.7));
+    box-shadow:0 0 30px rgba(0,0,0,.35);opacity:0;border-radius:0 3px 3px 0;
+  }
+  .book.open .flip{animation:pageflip .8s .12s ease-in both}
+  @keyframes pageflip{
+    0%{opacity:.95;transform:rotateY(0)}
+    100%{opacity:0;transform:rotateY(-172deg)}
+  }
+
+  /* 金光粒子 */
+  .spark{
+    position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:70;
+    background:radial-gradient(circle,#fff6d4,rgba(217,180,91,0) 70%);
+    animation:burst .95s ease-out forwards;
+  }
+  @keyframes burst{
+    0%{transform:translate(0,0) scale(1);opacity:1}
+    100%{transform:translate(var(--sx),var(--sy)) scale(.2);opacity:0}
+  }
+
+  .sfx{
+    position:fixed;bottom:14px;right:16px;z-index:20;
+    background:none;border:1px solid #5c4622;border-radius:3px;
+    color:#a08a5e;cursor:pointer;padding:5px 9px;
+    font-family:inherit;font-size:10.5px;letter-spacing:.14em;transition:.2s;
+  }
+  .sfx:hover{color:var(--gold-hi);border-color:var(--gold)}
+
+  .scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden}
+  .scroll::-webkit-scrollbar{width:7px}
+  .scroll::-webkit-scrollbar-thumb{background:#4a3720;border-radius:4px}
+  .scroll::-webkit-scrollbar-track{background:transparent}
+
+  @media (max-width:820px){
+    .books{min-height:170px}
+    .spine .label{font-size:11px}
+    .window{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="room">
+  <div class="moonbeam"></div>
+  <div class="window"></div>
+  <div class="floor"></div>
+  <div class="scroll">
+    <div class="masthead">
+      <svg class="crest" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff3d0"/><stop offset="55%" stop-color="#d9b45b"/><stop offset="100%" stop-color="#8d7132"/>
+        </linearGradient></defs>
+        <path d="M21 3l3.6 7.6 8.4 1-6 6 1.5 8.4L21 22.2l-7.5 3.8L15 17.6l-6-6 8.4-1z" fill="url(#g)" opacity=".95"/>
+        <path d="M9 30c6 4 18 4 24 0" stroke="url(#g)" stroke-width="1.2" fill="none" opacity=".8"/>
+        <path d="M12 34.5c5.5 3 12.5 3 18 0" stroke="url(#g)" stroke-width="1" fill="none" opacity=".55"/>
+      </svg>
+      <h1>扑克的书房</h1>
+      <div class="sub">The Study &middot; 取一本书，便打开一件造物</div>
+    </div>
+
+    <div class="plaques" id="plaques"></div>
+    <div class="bookcase" id="bookcase"></div>
+    <div style="height:16vh"></div>
+  </div>
+  <div class="desk"></div>
+  <div class="hint">将书自架上取下 &middot; 按 Esc 合上</div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="veil" id="veil"></div>
+</div>
+<button class="sfx" id="sfxBtn">音效：开</button>
+
+<script>
+/* =========================================================
+   藏书目录 —— 线上版
+   已单独部署的站点直接指向线上地址，其余小体量工具随本仓库打包
+   本地全量版（含大体量与不公开内容）见桌面 书房.html
+   ========================================================= */
+const BOOKS = [
+  // ——— 工具 ———
+  {t:"我的日常记录", n:"日常记录", s:"运动 · 读书 · 思考 · 看房", f:"https://pokeryang.github.io/daily-records/", c:"tool", p:0},
+  {t:"记账助手", n:"记账助手", s:"日常收支与账目", f:"https://pokeryang.github.io/expense-tracker/", c:"tool", p:1},
+  {t:"工资税后测算", n:"工资测算", s:"实际到手与全年预测", f:"https://pokeryang.github.io/salary-tax/", c:"tool", p:2},
+  {t:"AI 与搜索知识图谱", n:"知识图谱", s:"文章沉淀 · 节点关联", f:"https://pokeryang.github.io/yang/", c:"tool", p:3},
+  {t:"电商导购 Agent 架构", n:"导购架构", s:"交互式架构演示", f:"t/agent-interactive.html", c:"tool", p:6},
+  {t:"小红书卡片生成器", n:"小红书卡片", s:"封面 · 内页 · 文案", f:"t/xiaohongshu-generator.html", c:"tool", p:7},
+  {t:"新手爸爸育儿指南", n:"育儿指南", s:"喂养 · 睡眠 · 护理", f:"t/baby-guide.html", c:"tool", p:2},
+  // ——— 汇报 / Demo ———
+  {t:"AI Native 体验设计转变", n:"设计转变", s:"零售设计范式 · 汇报站点", f:"https://pokeryang.github.io/ai-native-design-site/", c:"demo", p:3},
+  {t:"闪购 One Agent 架构", n:"One Agent", s:"交互演示", f:"https://pokeryang.github.io/yang/oneagent-interactive.html", c:"demo", p:1},
+  {t:"送花助手 Agent", n:"送花助手", s:"鲜花品类对话 demo", f:"d/flower-agent-chat-v2.html", c:"demo", p:7},
+  {t:"买菜助手 Agent", n:"买菜助手", s:"蔬菜生鲜对话 demo", f:"d/vegetables-agent-chat.html", c:"demo", p:5},
+  {t:"选酒助手 Agent", n:"选酒助手", s:"酒类对话 demo", f:"d/wine-agent-chat.html", c:"demo", p:0},
+  {t:"AI 落地页评测报告", n:"评测报告", s:"10 query 横向评测", f:"t/eval-report.html", c:"demo", p:2},
+];
+
+/* 皮革色板：深红/墨绿/藏青/牛血/陈棕/紫檀/橄榄/炭黑 */
+const PALETTE = [
+  {a:"#7b1f2b",b:"#4a1017",n:"oxblood"},
+  {a:"#1f4a34",b:"#0e2a1d",n:"forest"},
+  {a:"#22355e",b:"#101c34",n:"navy"},
+  {a:"#8a3b1e",b:"#4d1d0c",n:"rust"},
+  {a:"#5c4327",b:"#31230f",n:"tan"},
+  {a:"#4a2350",b:"#26102b",n:"plum"},
+  {a:"#4d5324",b:"#282c10",n:"olive"},
+  {a:"#2b2b2f",b:"#141416",n:"charcoal"},
+];
+
+/* ============ 场景装饰 ============ */
+(function decorate(){
+  const room=document.querySelector(".room");
+  // 蜡烛
+  const spots=[[8,16,44],[17,9,60],[86,14,50],[92,26,38],[74,7,54],[26,20,34]];
+  spots.forEach(([x,y,h],i)=>{
+    const c=document.createElement("div");
+    c.className="candle";
+    c.style.left=x+"%"; c.style.top=y+"%";
+    c.style.animationDelay=(i*.9)+"s";
+    c.innerHTML='<div class="halo"></div><div class="flame"></div><div class="wax" style="height:'+h+'px"></div>';
+    room.appendChild(c);
+  });
+  // 尘埃
+  for(let i=0;i<46;i++){
+    const m=document.createElement("div");
+    m.className="mote";
+    const sz=Math.random()*2.6+1.2;
+    m.style.width=m.style.height=sz+"px";
+    m.style.left=(Math.random()*100)+"%";
+    m.style.top=(Math.random()*100)+"%";
+    m.style.setProperty("--dx",(Math.random()*90-45)+"px");
+    m.style.setProperty("--dy",(-Math.random()*220-70)+"px");
+    m.style.animationDuration=(Math.random()*16+13)+"s";
+    m.style.animationDelay=(-Math.random()*20)+"s";
+    room.appendChild(m);
+  }
+})();
+
+/* ============ 音效（WebAudio 合成，无外部素材） ============ */
+const SFX=(()=>{
+  let ctx=null,on=true;
+  const ac=()=>{ if(!ctx){ try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null} } return ctx; };
+  function noise(dur,filterHz,gain,type){
+    const c=ac(); if(!c||!on) return;
+    const len=Math.floor(c.sampleRate*dur);
+    const buf=c.createBuffer(1,len,c.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,1.8); }
+    const src=c.createBufferSource(); src.buffer=buf;
+    const bq=c.createBiquadFilter(); bq.type=type||"bandpass"; bq.frequency.value=filterHz; bq.Q.value=.8;
+    const g=c.createGain(); g.gain.value=gain;
+    src.connect(bq).connect(g).connect(c.destination); src.start();
+  }
+  function tone(f1,f2,dur,gain,type){
+    const c=ac(); if(!c||!on) return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=type||"sine"; o.frequency.setValueAtTime(f1,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(Math.max(30,f2),c.currentTime+dur);
+    g.gain.setValueAtTime(gain,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0008,c.currentTime+dur);
+    o.connect(g).connect(c.destination); o.start(); o.stop(c.currentTime+dur+.02);
+  }
+  return {
+    pull(){ noise(.26,900,.055); tone(150,70,.22,.05,"triangle"); },
+    open(){ noise(.55,2600,.05,"highpass"); tone(320,180,.5,.03,"sine"); },
+    close(){ tone(120,55,.34,.06,"triangle"); noise(.2,600,.04); },
+    toggle(){ on=!on; return on; },
+    get on(){ return on; }
+  };
+})();
+
+/* ============ 渲染书架 ============ */
+const bookcase=document.getElementById("bookcase");
+let filter="all";
+
+function render(){
+  const list=BOOKS.filter(b=>filter==="all"||b.c===filter);
+  const perShelf=Math.max(2,Math.ceil(list.length/2));   // 固定两层，视觉更有体量
+  bookcase.innerHTML="";
+  for(let i=0;i<list.length;i+=perShelf){
+    const chunk=list.slice(i,i+perShelf);
+    const shelf=document.createElement("div"); shelf.className="shelf";
+    const row=document.createElement("div"); row.className="books";
+    chunk.forEach((b,j)=>{
+      const pal=PALETTE[b.p%PALETTE.length];
+      const el=document.createElement("div");
+      el.className="spine";
+      const name=b.n||b.t;
+      const h=150+((name.length*13+j*19)%44);       // 高低错落 150~193
+      const w=Math.min(60,Math.max(38,28+name.length*4.2)); // 厚薄按书名长度
+      el.style.height=h+"px"; el.style.width=w+"px";
+      // 竖排标题自适应：保证整行文字塞得进书脊高度
+      let units=0;
+      for(const ch of name) units += /[\u4e00-\u9fff\u3000-\u303f]/.test(ch) ? 1.05 : 0.58;
+      const fs=Math.max(9.5,Math.min(14,(h-18)/Math.max(1,units)));
+      el.style.background="linear-gradient(90deg,"+pal.b+" 0%,"+pal.a+" 22%,"+pal.a+" 68%,"+pal.b+" 100%)";
+      el.title=b.t+" — "+b.s;
+      el.innerHTML='<span class="label" style="font-size:'+fs.toFixed(1)+'px">'+esc(name)+'</span>';
+      el.addEventListener("click",()=>takeBook(b,el));
+      row.appendChild(el);
+    });
+    const board=document.createElement("div"); board.className="board";
+    shelf.appendChild(row); shelf.appendChild(board);
+    bookcase.appendChild(shelf);
+  }
+}
+
+/* 分类铜牌 */
+const CATS=[["all","全部藏书"],["tool","工具"],["demo","汇报 · Demo"]];
+const plaques=document.getElementById("plaques");
+CATS.forEach(([k,label])=>{
+  const b=document.createElement("button");
+  b.className="plaque"+(k==="all"?" on":"");
+  const n=k==="all"?BOOKS.length:BOOKS.filter(x=>x.c===k).length;
+  b.textContent=label+" · "+n;
+  b.onclick=()=>{
+    filter=k;
+    [...plaques.children].forEach(c=>c.classList.remove("on"));
+    b.classList.add("on"); render();
+  };
+  plaques.appendChild(b);
+});
+render();
+
+/* ============ 取书 → 开书 ============ */
+const stage=document.getElementById("stage");
+let current=null, currentSpine=null;
+
+function sparkle(x,y,n){
+  for(let i=0;i<n;i++){
+    const s=document.createElement("div");
+    s.className="spark";
+    s.style.left=x+"px"; s.style.top=y+"px";
+    const a=Math.random()*Math.PI*2, d=60+Math.random()*180;
+    s.style.setProperty("--sx",Math.cos(a)*d+"px");
+    s.style.setProperty("--sy",(Math.sin(a)*d-40)+"px");
+    s.style.animationDelay=(Math.random()*.22)+"s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1300);
+  }
+}
+
+function takeBook(b,spineEl){
+  if(current) return;
+  SFX.pull();
+  const r=spineEl.getBoundingClientRect();
+  sparkle(r.left+r.width/2, r.top+r.height/2, 14);
+  spineEl.classList.add("taken");
+  currentSpine=spineEl;
+
+  const pal=PALETTE[b.p%PALETTE.length];
+  const book=document.createElement("div");
+  book.className="book";
+  book.innerHTML=
+    '<div class="spread">'+
+      '<div class="bar">'+
+        '<div class="t">'+esc(b.t)+'<small>'+esc(b.s)+' &nbsp;·&nbsp; '+esc(b.f)+'</small></div>'+
+        '<button class="bbtn" data-act="new">新标签页打开</button>'+
+        '<button class="bbtn" data-act="close">合上</button>'+
+      '</div>'+
+      '<div class="paper">'+
+        '<div class="loading"><div class="ring"></div><div>正在展开书页…</div>'+
+          '<div class="fb"><button class="bbtn" data-act="new">直接在新标签页打开</button></div>'+
+        '</div>'+
+        '<iframe title="'+esc(b.t)+'"></iframe>'+
+        '<div class="gutter"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="flip"></div>'+
+    '<div class="edge"></div>'+
+    '<div class="cover" style="background:'+
+      'radial-gradient(120% 90% at 30% 15%, rgba(255,255,255,.10), transparent 55%),'+
+      'linear-gradient(140deg,'+pal.a+','+pal.b+' 70%)">'+
+      '<div class="frame"></div>'+
+      '<svg width="34" height="34" viewBox="0 0 42 42" aria-hidden="true">'+
+        '<path d="M21 4l3.4 7.4 8 1-5.7 5.8L28.2 26 21 22.4 13.8 26l1.5-7.8L9.6 12.4l8-1z" fill="#d9b45b" opacity=".92"/>'+
+      '</svg>'+
+      '<div class="ct">'+esc(b.t)+'</div>'+
+      '<div class="rule"></div>'+
+      '<div class="cs">'+esc(b.s)+'</div>'+
+    '</div>';
+  stage.appendChild(book);
+  stage.classList.add("on");
+  current=book;
+
+  // FLIP：从书脊位置飞到中央
+  const tr=book.getBoundingClientRect();
+  const dx=(r.left+r.width/2)-(tr.left+tr.width/2);
+  const dy=(r.top+r.height/2)-(tr.top+tr.height/2);
+  const sx=Math.max(.08,r.width/tr.width), sy=Math.max(.1,r.height/tr.height);
+  book.style.transition="none";
+  book.style.transform="translate("+dx+"px,"+dy+"px) scale("+sx+","+sy+") rotateY(-82deg)";
+  requestAnimationFrame(()=>{
+    book.style.transition="";
+    book.style.transform="translate(0,0) scale(1) rotateY(0deg)";
+  });
+
+  // 展开：封面掀开 + 页面注入
+  setTimeout(()=>{
+    SFX.open();
+    book.style.width="min(1180px,94vw)";
+    book.style.height="min(760px,80vh)";
+    book.classList.add("open");
+    const c2=book.getBoundingClientRect();
+    sparkle(window.innerWidth/2, window.innerHeight/2, 22);
+
+    const ifr=book.querySelector("iframe");
+    const load=book.querySelector(".loading");
+    let done=false;
+    ifr.addEventListener("load",()=>{done=true;load.classList.add("hide")});
+    ifr.src=encodeURI(b.f);
+    // 兜底：大文件 / iframe 被拦时提示新标签页
+    setTimeout(()=>{ if(!done){ load.querySelector("div:nth-child(2)").textContent="这本书页数过多，正在慢慢展开…"; } },2600);
+    setTimeout(()=>{ if(!done){ load.querySelector("div:nth-child(2)").textContent="书页无法在此展开"; } },12000);
+  },820);
+
+  // 按钮
+  book.addEventListener("click",e=>{
+    const act=e.target.getAttribute&&e.target.getAttribute("data-act");
+    if(act==="new") window.open(encodeURI(b.f),"_blank");
+    if(act==="close") closeBook();
+  });
+}
+
+function closeBook(){
+  if(!current) return;
+  SFX.close();
+  const book=current, spine=currentSpine;
+  current=null; currentSpine=null;
+  book.classList.remove("open");
+  book.style.width="340px"; book.style.height="470px";
+  const ifr=book.querySelector("iframe"); if(ifr) ifr.src="about:blank";
+  setTimeout(()=>{
+    if(spine){
+      const r=spine.getBoundingClientRect();
+      const tr=book.getBoundingClientRect();
+      const dx=(r.left+r.width/2)-(tr.left+tr.width/2);
+      const dy=(r.top+r.height/2)-(tr.top+tr.height/2);
+      const sx=Math.max(.08,r.width/tr.width), sy=Math.max(.1,r.height/tr.height);
+      book.style.transform="translate("+dx+"px,"+dy+"px) scale("+sx+","+sy+") rotateY(-82deg)";
+      book.style.opacity=".2";
+    }
+    setTimeout(()=>{
+      book.remove();
+      stage.classList.remove("on");
+      if(spine) spine.classList.remove("taken");
+    },700);
+  },260);
+}
+
+document.getElementById("veil").onclick=closeBook;
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeBook(); });
+
+const sfxBtn=document.getElementById("sfxBtn");
+sfxBtn.onclick=()=>{ sfxBtn.textContent="音效："+(SFX.toggle()?"开":"关"); };
+
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+</script>
+
+<script>
+window.addEventListener("load",()=>{setTimeout(()=>{const sp=document.querySelectorAll(".spine");const i=Number((location.hash||"#6").slice(1))||0;if(sp[i])sp[i].click();},500);});
+</script>
+</body>
+</html>
