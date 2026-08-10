@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>淘宝闪购 · 组织架构</title>
+<style>
+:root{
+  --bg:#fff;--card:#fff;--line:#e4e8ef;--muted:#8a94a6;--text:#1c2029;
+  --brand:#1677ff;--gold:#faad14;--pill:#eef4ff;
+  --l0:#0b3d91;--l1:#1677ff;--l2:#722ed1;--l3:#13c2c2;--l4:#52c41a;--l5:#fa8c16;--l6:#eb2f96;--l7:#8c8c8c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",sans-serif;background:#fff;color:var(--text);font-size:14px;line-height:1.5}
+
+/* ===== 顶栏 (单行) ===== */
+header{position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid var(--line);padding:8px 20px;display:flex;gap:14px;row-gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+header h1{font-size:14px;margin:0;font-weight:600;flex-shrink:0}
+header .stats{color:var(--muted);font-size:11px;white-space:nowrap;flex-shrink:0}
+header input{width:220px;padding:6px 10px;border:1px solid var(--line);border-radius:5px;font-size:12px;outline:none;flex-shrink:0}
+header input:focus{border-color:var(--brand)}
+header .btns{display:flex;gap:3px;flex-shrink:0}
+header button{padding:4px 9px;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer;font-size:11px}
+header button:hover{border-color:var(--brand);color:var(--brand)}
+header .sep{flex:1}
+header .tabs{display:flex;gap:16px;align-items:center;height:28px;flex-shrink:0}
+header .tab{padding:0 2px;border:none;background:transparent;font-size:12px;cursor:pointer;color:#7c889c;display:flex;align-items:center;position:relative;height:100%}
+header .tab.active{color:#11192D;font-weight:600}
+header .tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-9px;height:2px;background:var(--brand);border-radius:1px}
+header .view-toggle{display:flex;gap:0;border:1px solid var(--line);border-radius:5px;overflow:hidden;flex-shrink:0}
+header .vbtn{padding:4px 10px;font-size:11px;cursor:pointer;background:#fafafa;border:none;border-right:1px solid var(--line);color:var(--muted)}
+header .vbtn:last-child{border-right:none}
+header .vbtn.active{background:var(--brand);color:#fff}
+header .sort-wrap{display:flex;align-items:center;gap:5px;flex-shrink:0}
+header .sort-label{font-size:11px;color:var(--muted);white-space:nowrap}
+header .sort-toggle{display:flex;gap:0;border:1px solid var(--line);border-radius:5px;overflow:hidden;flex-shrink:0}
+header .sbtn{padding:4px 8px;font-size:11px;cursor:pointer;background:#fafafa;border:none;border-right:1px solid var(--line);color:var(--muted)}
+header .sbtn:last-child{border-right:none}
+header .sbtn.active{background:var(--brand);color:#fff}
+
+/* ===== 列表视图 ===== */
+#list-view{padding:16px 20px;max-width:1400px;margin:0 auto}
+#tree-view{display:none}
+
+.legend{margin-bottom:12px;padding:8px 12px;background:#fff;border:1px solid var(--line);border-radius:6px;display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);align-items:center}
+.legend .badge{display:inline-block;padding:1px 6px;border-radius:3px;color:#fff;font-weight:600;font-size:10px;margin-right:4px}
+
+.dept{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:6px 0;overflow:hidden;transition:all .2s}
+.dept:hover{box-shadow:0 4px 14px rgba(22,119,255,.06)}
+.dept-header{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer}
+.dept-header:hover{background:#fafcff}
+.dept.open>.dept-header{background:#f7faff;border-bottom:1px solid var(--line)}
+.dept-caret{width:10px;text-align:center;color:var(--muted);font-size:9px;transition:transform .15s;flex-shrink:0}
+.dept.open>.dept-header>.dept-caret{transform:rotate(90deg)}
+.dept-lv{padding:2px 6px;border-radius:4px;color:#fff;font-weight:600;font-size:10px;font-family:ui-monospace,Menlo,monospace;flex-shrink:0;letter-spacing:.5px}
+.dept.l0>.dept-header>.dept-lv{background:var(--l0)}
+.dept.l1>.dept-header>.dept-lv{background:var(--l1)}
+.dept.l2>.dept-header>.dept-lv{background:var(--l2)}
+.dept.l3>.dept-header>.dept-lv{background:var(--l3)}
+.dept.l4>.dept-header>.dept-lv{background:var(--l4)}
+.dept.l5>.dept-header>.dept-lv{background:var(--l5)}
+.dept.l6>.dept-header>.dept-lv{background:var(--l6)}
+.dept.l7>.dept-header>.dept-lv{background:var(--l7)}
+.dept-name{font-weight:700;font-size:12px;color:#11192D;flex-shrink:0}
+.dept-leader-name{font-size:12px;color:#11192D;flex-shrink:0}
+.dept-leader-nick{font-size:12px;color:#7c889c;flex-shrink:0}
+.dept-leader-wno{font-size:12px;font-weight:400;color:#7c889c;font-family:ui-monospace,Menlo,monospace;flex-shrink:0}
+.dept-code{font-size:12px;font-weight:400;color:#cacfd7;font-family:ui-monospace,Menlo,monospace;flex-shrink:0}
+.dept-dual{font-size:11px;padding:2px 7px;border-radius:10px;background:#fff5e6;color:#c47311;border:1px dashed #e9a253;flex-shrink:0}
+.tdual{font-size:11px;color:#c47311;background:#fff5e6;border:1px dashed #e9a253;border-radius:8px;padding:2px 6px;margin-top:6px;display:inline-block;line-height:1.3;max-width:100%;white-space:normal}
+.dept-stats{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap;align-items:center}
+.dept-stat{font-size:12px;color:#7C889C}
+.dept-stat b{font-weight:600;color:#7C889C}
+.dept-body{display:none;padding:8px 12px 10px;background:#fbfcfd}
+.dept.open>.dept-body{display:block}
+.section-title{font-size:12px;color:#7c889c;font-weight:700;margin:6px 0 4px}
+.member-grid{display:flex;flex-wrap:wrap;gap:2px 4px;margin-bottom:8px}
+.chip{background:transparent;border:none;border-radius:0;padding:2px 8px 2px 0;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+.chip .pname{color:#11192D}
+.chip .pnick{color:#7c889c;font-size:12px}
+.chip .pwno{color:#7c889c;font-weight:400;font-family:ui-monospace,Menlo,monospace}
+.chip.floatm .pname{color:#11192D}
+.chip .ptag-float{color:#7c889c;font-size:12px;margin-left:2px}
+.chip.match .pname{background:#fff5d1;font-weight:600;padding:1px 4px;border-radius:3px}
+.dept-children{margin-left:14px;border-left:1px dashed var(--line);padding-left:14px;margin-top:6px}
+.dept.l0>.dept-body>.dept-children{border-left-color:var(--l1)}
+.dept.l1>.dept-body>.dept-children{border-left-color:var(--l2)}
+.dept.l2>.dept-body>.dept-children{border-left-color:var(--l3)}
+.dept.l3>.dept-body>.dept-children{border-left-color:var(--l4)}
+.dept.l4>.dept-body>.dept-children{border-left-color:var(--l5)}
+.floatm-strip{margin-top:8px;padding:0;background:transparent;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}
+.floatm-strip .lbl{color:#7c889c;font-size:12px;font-weight:700;margin-right:6px;flex-shrink:0}
+.match{background:#fff5d1 !important;border-color:var(--gold) !important}
+
+/* ===== 树状图视图 (右向展开) ===== */
+#tree-view{position:relative;width:100%;height:calc(100vh - 46px);overflow:hidden;background:#fff;cursor:grab}
+#tree-view.dragging{cursor:grabbing}
+#tree-canvas{position:absolute;top:0;left:0;transform-origin:0 0;transition:none}
+/* 节点自身横向: card 在左, 子节点在右 */
+.tnode{display:flex;flex-direction:row;align-items:flex-start;position:relative}
+.tcard{
+  width:210px;background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:8px 10px;cursor:pointer;position:relative;transition:box-shadow .15s;
+  font-size:11px;flex-shrink:0;
+}
+.tcard:hover{box-shadow:0 3px 12px rgba(22,119,255,.1)}
+.tcard .tlv{position:absolute;top:6px;right:6px;padding:1px 5px;border-radius:3px;color:#fff;font-size:9px;font-weight:600;font-family:monospace}
+.tcard .tname{font-weight:700;font-size:12px;color:#11192D;margin-bottom:4px;padding-right:28px}
+.tcard .tleader{font-size:11px;color:#7c889c;margin-bottom:3px}
+.tcard .tstats{font-size:10px;color:#7c889c}
+.tcard .tstats b{font-weight:600;color:#11192D}
+.tcard .tmembers{margin-top:6px;border-top:1px solid var(--line);padding-top:4px;max-height:200px;overflow-y:auto;font-size:10px;color:#11192D;line-height:1.7}
+.tcard .tmembers .tm{white-space:nowrap}
+.tcard .tmembers .tw{color:#7c889c;font-family:monospace}
+.tcard.expandable{border-color:var(--brand)}
+.tcard.expanded{border-color:var(--brand);box-shadow:0 0 0 1px rgba(22,119,255,.15)}
+.tcard.match{background:#fff5d1;border-color:var(--gold);box-shadow:0 0 0 2px rgba(250,173,20,.25)}
+.tcard.path{border-color:#a4c8ff}
+.tcard.pseudo{background:#fbfcfd}
+.tcard.pseudo .tstats{padding-bottom:2px}
+.need-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff4d4f;margin-right:6px;vertical-align:middle;flex-shrink:0}
+.tm .need-dot{width:6px;height:6px;margin-right:4px}
+/* 子节点垂直堆叠, 在父节点右侧 */
+.tchildren{display:flex;flex-direction:column;gap:10px;margin-left:36px;position:relative;padding-left:20px}
+/* 父卡片到 trunk 的水平接入线 (y=22 对齐父卡片头部中线) */
+.tchildren::before{
+  content:'';position:absolute;left:-36px;top:22px;width:36px;height:0;
+  border-top:1px solid #c8cdd4;
+}
+/* 每子节点自绘 vertical trunk 线段, 段段拼接 (线在卡片外侧 x=-20 处) */
+.tchildren>.tnode::before{
+  content:'';position:absolute;left:-20px;top:-5px;bottom:-5px;width:0;
+  border-left:1px solid #c8cdd4;
+}
+.tchildren>.tnode:first-child::before{ top:22px; }
+.tchildren>.tnode:last-child::before{ bottom:auto; top:-5px; height:27px; }
+.tchildren>.tnode:only-child::before{ display:none; }
+/* 每子节点水平接入线: 从 trunk (x=-20) 到卡片左沿 (x=0) */
+.tchildren>.tnode::after{
+  content:'';position:absolute;left:-20px;top:22px;width:20px;height:0;
+  border-top:1px solid #c8cdd4;
+}
+
+/* zoom 控件 */
+.zoom-ctrl{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:10}
+.zoom-ctrl button{width:32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.zoom-ctrl button:hover{border-color:var(--brand);color:var(--brand)}
+.zoom-ctrl .zlabel{text-align:center;font-size:10px;color:var(--muted)}
+/* ===== 7.27 变更高亮 ===== */
+/* 团队: 新增=黄 迁入=绿 迁出=红 ; 人员: 新增=橙 迁入=绿 迁出=红 */
+.chg-badge{display:inline-block;padding:1px 6px;border-radius:3px;color:#fff;font-weight:600;font-size:10px;margin-left:6px;flex-shrink:0}
+.chg-new{background:#faad14}    /* 团队新增 黄 */
+.chg-moved{background:#52c41a}  /* 团队迁入 绿 */
+.chg-ghost{background:#ff4d4f}  /* 团队迁出/删除 红 */
+.dept.d-new>.dept-header{background:#fffbe6!important;box-shadow:inset 3px 0 0 #faad14}
+.dept.d-moved>.dept-header{background:#f2fbf0!important;box-shadow:inset 3px 0 0 #52c41a}
+.dept.d-ghost{opacity:.85}
+.dept.d-ghost>.dept-header{background:#fff1f0!important;box-shadow:inset 3px 0 0 #ff4d4f;border:1px dashed #ffa39e}
+.dept.d-ghost .dept-name{color:#cf1322;font-weight:600}
+.chg-from{font-size:11px;color:#8c8c8c;margin-left:6px}
+.chg-to{font-size:11px;color:#cf1322;margin-left:6px}
+/* 祖先团队: 含下级变更的小圆点 */
+.desc-dots{display:inline-flex;gap:3px;margin-left:6px;align-items:center;flex-shrink:0}
+.desc-dots .dd{width:7px;height:7px;border-radius:50%;display:inline-block}
+.dd-new{background:#faad14}.dd-in{background:#52c41a}.dd-out{background:#ff4d4f}
+/* 人员变更标记 */
+.pchg{font-size:10px;padding:0 5px;border-radius:8px;color:#fff;font-weight:600;margin-left:3px}
+.pchg-new{background:#fa8c16}   /* 人员新增 橙 */
+.pchg-in{background:#52c41a}    /* 人员迁入 绿 */
+.pchg-out{background:#ff4d4f}   /* 人员迁出 红 */
+.pchg-note{font-size:10px;color:#8c8c8c;margin-left:2px}
+.pchg-note.to{color:#cf1322}
+.chip.out-mem .pname{color:#cf1322;text-decoration:line-through}
+/* 树状图团队变更 */
+.tcard.t-new{border:2px solid #faad14;box-shadow:0 0 0 3px rgba(250,173,20,.12)}
+.tcard.t-moved{border:2px solid #52c41a;box-shadow:0 0 0 3px rgba(82,196,26,.12)}
+.tcard.t-ghost{border:1px dashed #ffa39e;background:#fff1f0}
+.tcard.t-ghost .tname{color:#cf1322}
+.tcard.t-desc{box-shadow:0 0 0 2px rgba(0,0,0,.04)}
+.tdesc-dots{display:inline-flex;gap:3px;margin-left:4px;vertical-align:middle}
+.tdesc-dots .dd{width:6px;height:6px;border-radius:50%;display:inline-block}
+.ver-legend{display:none;gap:14px;align-items:center;padding:6px 20px;background:#fffef5;border-bottom:1px solid var(--line);font-size:11px;color:#666;flex-wrap:wrap}
+.ver-legend.show{display:flex}
+.ver-legend .lg{display:inline-flex;align-items:center;gap:4px}
+.ver-legend .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.ver-legend .grp{font-weight:600;color:#333;margin-left:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>淘宝闪购 · 组织架构</h1>
+  <span id="cloudStatus" style="font-size:12px;color:#7a8194;white-space:nowrap;margin-left:10px">● 未解锁</span>
+  <a id="btnUnlock" style="font-size:12px;color:#1677ff;cursor:pointer;text-decoration:underline;margin-left:6px">解锁/切换密钥</a>
+  <a id="btnUpdate" style="display:none;font-size:12px;color:#1677ff;cursor:pointer;text-decoration:underline;margin-left:6px">更新快照</a>
+  <span class="stats" id="stats"></span>
+  <input id="search" placeholder="搜索姓名 / 花名 / 工号 / 部门号 / 部门名">
+  <div class="btns">
+    <button data-lv="1">L1</button>
+    <button data-lv="2">L2</button>
+    <button data-lv="3">L3</button>
+    <button data-lv="all">全展</button>
+    <button data-lv="0">全收</button>
+  </div>
+  <div class="sep"></div>
+  <div class="tabs" id="version-tabs">
+    <div class="tab" data-ver="26.7.23">26.7.23</div>
+    <div class="tab" data-ver="26.7.27">26.7.27</div>
+    <div class="tab active" data-ver="26.8.3">26.8.3</div>
+  </div>
+  <div class="sort-wrap">
+    <span class="sort-label">排序</span>
+    <div class="sort-toggle" id="sort-toggle">
+      <button class="sbtn active" data-sort="wno" title="部门按 leader 工号升序，成员按工号升序（入职从老到新）">工号</button>
+      <button class="sbtn" data-sort="size" title="部门按总人数从多到少，成员仍按工号升序">人数</button>
+      <button class="sbtn" data-sort="raw" title="组织架构接口原始顺序（按直属 M 分组）">原始</button>
+    </div>
+  </div>
+  <div class="view-toggle">
+    <button class="vbtn active" data-view="list">列表</button>
+    <button class="vbtn" data-view="tree">树状图</button>
+  </div>
+</header>
+
+<div class="ver-legend" id="ver-legend">
+  <span id="ver-legend-title">26.7.27 变更：</span>
+  <span class="lg"><span class="sw" style="background:#faad14"></span>新增</span>
+  <span class="lg"><span class="sw" style="background:#52c41a"></span>迁入</span>
+  <span class="lg"><span class="sw" style="background:#ff4d4f"></span>迁出/删除</span>
+</div>
+
+<div id="list-view">
+  <div id="root"></div>
+</div>
+
+<div id="tree-view">
+  <div id="tree-canvas"></div>
+  <div class="zoom-ctrl">
+    <button onclick="zoomIn()">+</button>
+    <div class="zlabel" id="zoom-label">100%</div>
+    <button onclick="zoomOut()">−</button>
+    <button onclick="zoomReset()" style="font-size:11px">⟲</button>
+  </div>
+</div>
+
+<script>
+
+
+var DATASETS = null;
+// ===================== 云端加密版 · 数据不在本文件里 =====================
+// 数据以 AES-256-GCM 加密后存放在 Supabase；密钥由 PBKDF2-SHA256 从本地密语派生，
+// 密语只存浏览器 localStorage，不进仓库、不上传。
+(function(){
+  var SB="https://gwerzaaishbvtaxhwezv.supabase.co";
+  var ANON="sb_publishable_mlvyWH8gGyPjwvFgVbhRjA__HE3yrwr";
+  var TABLE="org_chart", SKEY="expense-app-secret";
+  function el(id){return document.getElementById(id);}
+  function say(t,c){ var s=el('cloudStatus'); if(s){ s.textContent='\u25cf '+t; s.style.color=c||'#8a8f99'; } }
+  function getSec(){ try{ return localStorage.getItem(SKEY)||''; }catch(e){ return ''; } }
+  function setSec(v){ try{ localStorage.setItem(SKEY,v); }catch(e){} }
+
+  function gate(msg){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:99999;background:#f6f7f9;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;';
+    d.innerHTML='<div style="background:#fff;border:1px solid #e5e6eb;border-radius:14px;padding:26px 28px;width:min(400px,88vw);box-shadow:0 8px 30px rgba(0,0,0,.08);">'
+      +'<div style="font-size:16px;font-weight:600;color:#1d2129;margin-bottom:6px;">\u9700\u8981\u5bc6\u8bed\u89e3\u9501</div>'
+      +'<div style="font-size:12.5px;color:#86909c;line-height:1.7;margin-bottom:14px;">\u672c\u9875\u6570\u636e\u5df2\u52a0\u5bc6\u5b58\u653e\u5728\u4e91\u7aef\uff0c\u5bc6\u8bed\u53ea\u4fdd\u5b58\u5728\u4f60\u672c\u673a\u6d4f\u89c8\u5668\u3002</div>'
+      +'<input id="__sec" type="password" placeholder="\u8f93\u5165\u5bc6\u8bed" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #e5e6eb;border-radius:8px;font-size:14px;outline:none;">'
+      +'<div id="__err" style="font-size:12px;color:#c53030;min-height:16px;margin-top:8px;">'+(msg||'')+'</div>'
+      +'<button id="__go" style="width:100%;padding:10px;border:none;background:#1677ff;color:#fff;border-radius:8px;font-size:14px;cursor:pointer;margin-top:6px;">\u89e3\u9501</button>'
+      +'</div>';
+    document.body.appendChild(d);
+    var i=d.querySelector('#__sec');
+    function go(){ var v=i.value.trim(); if(!v) return; setSec(v); d.remove(); start(); }
+    d.querySelector('#__go').onclick=go;
+    i.addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
+    i.focus();
+  }
+
+  function b64buf(b64){
+    var bin=atob(b64), n=bin.length, u=new Uint8Array(n);
+    for(var i=0;i<n;i++) u[i]=bin.charCodeAt(i);
+    return u;
+  }
+  async function gunzip(buf){
+    if(typeof DecompressionStream!=='undefined'){
+      var rs=new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip')));
+      return new Uint8Array(await rs.arrayBuffer());
+    }
+    await new Promise(function(res,rej){
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js';
+      s.onload=res; s.onerror=rej; document.head.appendChild(s);
+    });
+    return window.pako.ungzip(buf);
+  }
+  async function sbGet(q){
+    var r=await fetch(SB+'/rest/v1/'+TABLE+q,{headers:{apikey:ANON,Authorization:'Bearer '+ANON,'x-app-secret':getSec()}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }
+
+  async function start(){
+    if(!getSec()) return gate('');
+    try{
+      say('\u6b63\u5728\u8bfb\u53d6\u4e91\u7aef\u2026');
+      var meta=await sbGet('?id=eq.0&select=data');
+      if(!meta.length){ return gate('\u5bc6\u8bed\u4e0d\u5bf9\uff0c\u6216\u4e91\u7aef\u65e0\u6570\u636e'); }
+      meta=meta[0].data;
+      say('\u6b63\u5728\u4e0b\u8f7d\u5bc6\u6587\uff080/'+meta.parts+'\uff09\u2026');
+      var rows=await sbGet('?id=gt.0&select=id,data&order=id.asc');
+      if(rows.length<meta.parts) throw new Error('\u5bc6\u6587\u5206\u7247\u4e0d\u5b8c\u6574 '+rows.length+'/'+meta.parts);
+      var b64=rows.map(function(x){return x.data.p;}).join('');
+      say('\u6b63\u5728\u89e3\u5bc6\u2026');
+      var enc=new TextEncoder();
+      var km=await crypto.subtle.importKey('raw',enc.encode(getSec()),'PBKDF2',false,['deriveKey']);
+      var key=await crypto.subtle.deriveKey(
+        {name:'PBKDF2',salt:b64buf(meta.salt),iterations:meta.iter,hash:'SHA-256'},
+        km,{name:'AES-GCM',length:256},false,['decrypt']);
+      var plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64buf(meta.iv)},key,b64buf(b64));
+      var bytes=meta.gzip? await gunzip(new Uint8Array(plain)) : new Uint8Array(plain);
+      DATASETS=JSON.parse(new TextDecoder().decode(bytes));
+      var m=el('loginModal'); if(m) m.style.display='none';
+      var u=el('updModal'); if(u) u.style.display='none';
+      var b1=el('btnUnlock'); if(b1) b1.style.display='none';
+      var b2=el('btnUpdate'); if(b2) b2.style.display='none';
+      say('云端加密版 · 已解锁','#2f855a');
+      runOrg();
+    }catch(e){
+      console.error(e);
+      if(String(e.message||e).indexOf('operation-specific reason')>=0 || e.name==='OperationError'){
+        try{ localStorage.removeItem(SKEY); }catch(_){}
+        return gate('\u5bc6\u8bed\u4e0d\u5bf9\uff0c\u8bf7\u91cd\u8bd5');
+      }
+      say('\u52a0\u8f7d\u5931\u8d25: '+(e.message||e),'#c53030');
+    }
+  }
+  if(document.readyState!=='loading') start(); else document.addEventListener('DOMContentLoaded',start);
+})();
+// ===================== /云端加密版 =====================
+
+
+function runOrg(){
+const VER_ORDER = Object.keys(DATASETS).sort();          // e.g. ['26.7.23','26.7.27']
+let ACTIVE_VER = VER_ORDER[VER_ORDER.length - 1] || '';  // 默认最新版本
+let DATA, people, depts, mDepts, topDepts;
+let DEPT_PARENTS = {};   // dno -> [父部门dno...]  (由 children 反向索引, 含双线的全部父)
+const LV_COLORS = ['#0b3d91','#1677ff','#722ed1','#13c2c2','#52c41a','#fa8c16','#eb2f96','#8c8c8c'];
+
+// ==================== 排序层 (纯展示, 不改动底层数据) ====================
+// 'wno'  = 部门按 leader 工号升序 + 成员按工号升序 (默认, 工号小=入职早)
+// 'size' = 部门按总人数降序 + 成员仍按工号升序
+// 'raw'  = 组织架构接口原始顺序 (按直属 M 分组)
+let SORT_MODE = 'wno';
+function _leaderWno(dno){
+  const d = depts[dno];
+  return (d && d.leader) ? String(d.leader) : '~';   // 无 leader 的排最后
+}
+function _deptSize(dno){
+  const d = depts[dno];
+  return d ? (d.subtreeSize || (d.members||[]).length || 0) : 0;
+}
+// 子部门排序: 返回新数组, 不改动 d.children
+function sortChildren(arr){
+  const a = (arr||[]).slice();
+  if(SORT_MODE === 'raw') return a;
+  if(SORT_MODE === 'size'){
+    return a.sort((x,y)=> _deptSize(y) - _deptSize(x)
+      || _leaderWno(x).localeCompare(_leaderWno(y))
+      || String(x).localeCompare(String(y)));
+  }
+  return a.sort((x,y)=> _leaderWno(x).localeCompare(_leaderWno(y))
+    || String(x).localeCompare(String(y)));
+}
+// 成员排序: 普通成员 + 无团队M 合并成 [{w, f}], f=true 表示无团队M
+function mergedMembers(memberPs, floatMs){
+  const arr = (memberPs||[]).map(w=>({w:w, f:false}))
+    .concat((floatMs||[]).map(w=>({w:w, f:true})));
+  if(SORT_MODE === 'raw') return arr;                // 原始: 普通成员在前, M 在后
+  return arr.sort((x,y)=> String(x.w).localeCompare(String(y.w)));
+}
+// 已迁出名单排序: 元素形如 {w, name, nickName, to}
+function sortOutMembers(arr){
+  const a = (arr||[]).slice();
+  if(SORT_MODE === 'raw') return a;
+  return a.sort((x,y)=> String(x.w).localeCompare(String(y.w)));
+}
+
+// ==================== 无团队M 标识 (仅供 float-M 行判定, 不再冒泡红点) ====================
+let unexpandedM = new Set();
+// 红点已按需求移除, 避免误导继续补 HAR
+const markDepts = new Set();
+const rootMarked = false;
+const DOT = '';
+
+function bindActiveData(){
+  DATA = DATASETS[ACTIVE_VER];
+  people = DATA.people; depts = DATA.depts; mDepts = DATA.manager_depts; topDepts = DATA.top_depts;
+  unexpandedM = new Set();
+  Object.entries(people).forEach(([w,p])=>{
+    if(!p || !p.isM) return;
+    const md = mDepts[w];
+    if(!md || md.length === 0) unexpandedM.add(w);
+  });
+  // 反向索引: 每个部门的全部父部门 (双线部门会有 ≥2 个父)
+  DEPT_PARENTS = {};
+  Object.entries(depts).forEach(([k,v])=>{
+    (v.children||[]).forEach(c=>{ (DEPT_PARENTS[c] = DEPT_PARENTS[c] || []).push(k); });
+  });
+}
+bindActiveData();
+
+// ==================== 双线汇报: 列出全部汇报线 ====================
+function _deptLabel(dno){
+  const apd = depts[dno]; if(!apd) return dno;
+  const l = apd.leader ? people[apd.leader] : null;
+  const who = l ? l.name + (l.nickName ? '·'+l.nickName : '') : '';
+  return (who ? who + '·' : '') + (apd.deptName || dno);
+}
+// 返回该部门全部汇报线的文本(用 ＋ 连接); 非双线返回 null
+function dualLinesText(dno){
+  const d = depts[dno];
+  if(!d || !(d._alt_parents && d._alt_parents.length)) return null;
+  const set = new Set(DEPT_PARENTS[dno] || []);
+  d._alt_parents.forEach(p=>set.add(p));
+  set.delete('ROOT');
+  const parents = [...set].filter(p => depts[p] && !String(p).startsWith('GHOST-'));
+  if(parents.length < 2) return null;
+  return parents.map(_deptLabel).join(' ＋ ');
+}
+
+// ==================== 7.27 变更标记 helpers ====================
+// 人员变更徽标: 新增(橙) / 迁入(绿,标来源) / 迁出(红,标去向)
+function personChgHtml(w){
+  const p = people[w]; if(!p || !p._chg727) return '';
+  const c = p._chg727;
+  if(c.type === 'new') return `<span class="pchg pchg-new">新增</span>`;
+  if(c.type === 'in')  return `<span class="pchg pchg-in">迁入</span>${c.from?`<span class="pchg-note">自 ${c.from}</span>`:''}`;
+  if(c.type === 'out') return `<span class="pchg pchg-out">迁出</span>${c.to?`<span class="pchg-note to">→ ${c.to}</span>`:''}`;
+  return '';
+}
+// 祖先团队: 含下级变更的小圆点 (new黄/in绿/out红)
+function descDotsHtml(d, treeMode){
+  const arr = d && d._desc_chg727; if(!arr || !arr.length) return '';
+  const order = ['new','in','out'], map={new:'dd-new',in:'dd-in',out:'dd-out'};
+  const label={new:'含新增',in:'含迁入',out:'含迁出'};
+  const dots = order.filter(t=>arr.includes(t))
+    .map(t=>`<span class="dd ${map[t]}" title="${label[t]}"></span>`).join('');
+  return `<span class="${treeMode?'tdesc-dots':'desc-dots'}">${dots}</span>`;
+}
+
+// 所在组"直接发生"的变更类型 -> {type:count}
+function directChgTypes(d){
+  const t = {};
+  const outN = (d && d._out_members && d._out_members.length) || 0;
+  if(outN) t.out = outN;
+  (d && d.members || []).forEach(w=>{
+    const c = people[w] && people[w]._chg727;
+    if(c && c.type){ t[c.type] = (t[c.type]||0) + 1; }
+  });
+  return t;
+}
+// 所在组: 醒目文字徽章 (新增黄/迁入绿/迁出红)
+function directChgBadges(d){
+  if(!d) return '';
+  const t = directChgTypes(d);
+  const parts = [];
+  if(t.new) parts.push(`<span class="chg-badge chg-new" title="本组新增">新增${t.new}</span>`);
+  if(t.in)  parts.push(`<span class="chg-badge chg-moved" title="本组迁入">迁入${t.in}</span>`);
+  if(t.out) parts.push(`<span class="chg-badge chg-ghost" title="本组迁出">迁出${t.out}</span>`);
+  return parts.join('');
+}
+// 上级组: 仅"下级传导且本组未直接发生"的类型 -> 小圆点
+function descDotsPropagated(d, treeMode){
+  const arr = d && d._desc_chg727; if(!arr || !arr.length) return '';
+  const direct = directChgTypes(d);
+  const rest = arr.filter(x=>!direct[x]);
+  if(!rest.length) return '';
+  const order = ['new','in','out'], map={new:'dd-new',in:'dd-in',out:'dd-out'};
+  const label = {new:'含新增',in:'含迁入',out:'含迁出'};
+  const dots = order.filter(t=>rest.includes(t))
+    .map(t=>`<span class="dd ${map[t]}" title="${label[t]}"></span>`).join('');
+  return `<span class="${treeMode?'tdesc-dots':'desc-dots'}">${dots}</span>`;
+}
+
+// ==================== 视图切换 ====================
+let currentView = 'list';
+document.querySelectorAll('.vbtn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentView = btn.dataset.view;
+    document.getElementById('list-view').style.display = currentView==='list'?'block':'none';
+    document.getElementById('tree-view').style.display = currentView==='tree'?'block':'none';
+    if(currentView==='tree' && !treeBuilt) buildTree();
+  };
+});
+
+// ==================== 展开按钮 (双视图统一) ====================
+document.querySelectorAll('header .btns button').forEach(btn=>{
+  btn.onclick = ()=>{
+    const lv = btn.dataset.lv;
+    if(currentView==='list'){
+      if(lv==='all') expandAll();
+      else if(lv==='0') collapseAll();
+      else expandLevel(+lv);
+    } else {
+      if(lv==='all') treeExpandAll();
+      else if(lv==='0') treeCollapseAll();
+      else treeExpandLevel(+lv);
+    }
+  };
+});
+
+// ==================== 列表视图 ====================
+function personChip(w, isFloat){
+  const p = people[w] || {workNo: w, name:'?'};
+  const cls = ['chip'];
+  if(isFloat) cls.push('floatm');
+  const tag = isFloat ? `<span class="ptag-float">无团队M</span>` : '';
+  const chg = personChgHtml(w);
+  return `<span class="${cls.join(' ')}" data-text="${((p.name||'')+(p.nickName||'')+w).toLowerCase()}">
+    <span class="pname">${p.name||'?'}</span>${p.nickName?`<span class="pnick">·${p.nickName}</span>`:''}
+    <span class="pwno">(${w})</span>${tag}${chg}</span>`;
+}
+// 迁出(红)人员占位: 旧团队里删除线人名 + 去向
+function outMemberChip(m){
+  return `<span class="chip out-mem" data-text="${((m.name||'')+(m.nickName||'')+m.w).toLowerCase()}">
+    <span class="pname">${m.name||'?'}</span>${m.nickName?`<span class="pnick">·${m.nickName}</span>`:''}
+    <span class="pwno">(${m.w})</span><span class="pchg pchg-out">迁出</span>${m.to?`<span class="pchg-note to">→ ${m.to}</span>`:''}</span>`;
+}
+
+function renderDept(dno, container, seen=new Set()){
+  if(seen.has(dno)) return; seen.add(dno);
+  const d = depts[dno]; if(!d) return;
+  const chgNew = !!d._new727, chgMoved = !!d._moved727, chgGhost = !!d._ghost727;
+  const leader = d.leader ? people[d.leader] : null;
+  const lv = Math.min(d.depth ?? 7, 7);
+  const el = document.createElement('div');
+  el.className = `dept l${lv}${chgNew?' d-new':''}${chgMoved?' d-moved':''}${chgGhost?' d-ghost':''}`; el.dataset.dno = dno;
+  el.dataset.text = (dno + (d.deptName||'') + (leader?.name||'') + (leader?.nickName||'')).toLowerCase();
+  const total = d.subtreeSize || d.members.length;
+  // 直属 = 直接挂在 leader 下的人(M+非M): 子部门数 + (成员里除 leader 外的人)
+  const direct = (d.children||[]).length + (d.members||[]).filter(w => w !== d.leader).length;
+  const nSubM = d.subMs.filter(x=>x!==d.leader).length;
+  const nSubD = (d.children||[]).length;
+  const isRoot = dno === 'ROOT';
+  const memberPs = d.members.filter(w=>!people[w]?.isM);
+  const subDeptLeaders = new Set((d.children||[]).map(cd => depts[cd]?.leader).filter(Boolean));
+  const floatMs = d.subMs.filter(w => w !== d.leader && !subDeptLeaders.has(w));
+  const nSubM2 = (d.children||[]).length + floatMs.length;
+  const _dl = dualLinesText(dno);
+  const dualChip = _dl ? `<span class="dept-dual" title="双线汇报：${_dl}">🔗 双线：${_dl}</span>` : '';
+  const _dirBadges = (!chgNew && !chgMoved && !chgGhost) ? directChgBadges(d) : '';
+  const _descDots = (!chgNew && !chgMoved && !chgGhost) ? descDotsPropagated(d, false) : '';
+  const _leaderChg = leader ? personChgHtml(d.leader) : '';
+  el.innerHTML = `
+    <div class="dept-header">
+      <span class="dept-caret">▶</span>
+      <span class="dept-lv">L${lv}</span>
+      <span class="dept-name">${d.deptName||'—'}</span>
+      ${chgNew?'<span class="chg-badge chg-new">新增</span>':''}
+      ${chgMoved?`<span class="chg-badge chg-moved">迁入</span><span class="chg-from">原属 ${d._moved727.fromName||d._moved727.from}</span>`:''}
+      ${chgGhost?`<span class="chg-badge chg-ghost">已迁出</span><span class="chg-to">→ ${d._ghost727.wentToName}</span>`:''}
+      ${_dirBadges}
+      ${_descDots}
+      ${leader ? `<span class="dept-leader-name">${leader.name}</span>${leader.nickName?`<span class="dept-leader-nick">·${leader.nickName}</span>`:''}
+        <span class="dept-leader-wno">(${d.leader})</span>${_leaderChg}` : ''}
+      ${isRoot || chgGhost || String(dno).startsWith('V-') || String(dno).startsWith('GHOST-') ? '' : `<span class="dept-code">部门 ${dno}</span>`}
+      ${dualChip}
+      <div class="dept-stats">
+        <span class="dept-stat">总人数 <b>${total}</b></span>
+        ${isRoot ? '' : `<span class="dept-stat">直属 <b>${direct}</b></span>`}
+        <span class="dept-stat">M <b>${nSubM2}</b></span>
+        <span class="dept-stat">子部门 <b>${nSubD}</b></span>
+      </div>
+    </div>
+    <div class="dept-body"></div>`;
+  el.querySelector('.dept-header').onclick = ()=>el.classList.toggle('open');
+  const body = el.querySelector('.dept-body');
+  const allMembers = mergedMembers(memberPs, floatMs);
+  if(allMembers.length){
+    const t = document.createElement('div'); t.className='section-title'; t.textContent=`成员（${allMembers.length}）`;
+    body.appendChild(t);
+    const g = document.createElement('div'); g.className='member-grid';
+    g.innerHTML = allMembers.map(o=>personChip(o.w, o.f)).join('');
+    body.appendChild(g);
+  }
+  // 迁出(红)人员占位: 旧团队仍在, 显示已迁出的人及去向
+  if(d._out_members && d._out_members.length){
+    const t = document.createElement('div'); t.className='section-title'; t.style.color='#cf1322';
+    t.textContent=`已迁出（${d._out_members.length}）`;
+    body.appendChild(t);
+    const g = document.createElement('div'); g.className='member-grid';
+    g.innerHTML = sortOutMembers(d._out_members).map(outMemberChip).join('');
+    body.appendChild(g);
+  }
+  if(nSubD){
+    const t = document.createElement('div'); t.className='section-title'; t.textContent=`下属部门（${nSubD}）`;
+    body.appendChild(t);
+    const kids = document.createElement('div'); kids.className='dept-children';
+    body.appendChild(kids);
+    sortChildren(d.children).forEach(cd=>renderDept(cd, kids, new Set(seen)));
+  }
+  container.appendChild(el);
+}
+
+const root = document.getElementById('root');
+// 注入 L0 虚拟根: 淘宝闪购 (雷雁群 000474), 三个真顶部门挂在下面
+function injectRoot(){
+  depts['ROOT'] = {
+    deptNo: 'ROOT',
+    deptName: '淘宝闪购',
+    leader: '000474',
+    members: [],
+    subMs: [],
+    children: topDepts.slice(),
+    depth: 0,
+    subtreeSize: topDepts.reduce((s,d)=>s+(depts[d]?.subtreeSize||0),0),
+  };
+}
+function renderList(){
+  injectRoot();
+  root.innerHTML = '';
+  renderDept('ROOT', root);
+  // 默认展开 L0 根
+  document.querySelectorAll('#root > .dept.l0').forEach(el=>el.classList.add('open'));
+  document.getElementById('stats').textContent = `${Object.keys(people).length} 人 · ${Object.keys(depts).length - 1} 部门 · ${Object.values(people).filter(p=>p.isM).length} M`;
+}
+renderList();
+
+// ==================== 版本切换 (26.7.23 / 26.7.27) ====================
+function updateLegend(){
+  const lg = document.getElementById('ver-legend');
+  const isBaseline = ACTIVE_VER === VER_ORDER[0];
+  if(lg) lg.classList.toggle('show', !isBaseline);
+  const title = document.getElementById('ver-legend-title');
+  if(title) title.textContent = ACTIVE_VER + ' 变更：';
+}
+document.querySelectorAll('#version-tabs .tab').forEach(tab=>{
+  tab.onclick = ()=>{
+    if(tab.classList.contains('active')) return;
+    document.querySelectorAll('#version-tabs .tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    ACTIVE_VER = tab.dataset.ver;
+    bindActiveData();
+    updateLegend();
+    // 重置并重建两个视图
+    treeBuilt = false; canvas.innerHTML = '';
+    const s = document.getElementById('search'); if(s) s.value = '';
+    renderList();
+    if(currentView === 'tree') buildTree();
+  };
+});
+updateLegend();
+
+// ==================== 排序切换 (工号 / 人数 / 原始) ====================
+document.querySelectorAll('#sort-toggle .sbtn').forEach(btn=>{
+  btn.onclick = ()=>{
+    if(btn.classList.contains('active')) return;
+    document.querySelectorAll('#sort-toggle .sbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    SORT_MODE = btn.dataset.sort;
+    // 重置并重建两个视图
+    treeBuilt = false; canvas.innerHTML = '';
+    const s = document.getElementById('search'); if(s) s.value = '';
+    renderList();
+    if(currentView === 'tree') buildTree();
+  };
+});
+
+function expandLevel(lv){
+  document.querySelectorAll('.dept').forEach(el=>{
+    const l = +el.className.match(/\bl(\d)\b/)[1];
+    if(l<lv) el.classList.add('open'); else el.classList.remove('open');
+  });
+}
+function expandAll(){document.querySelectorAll('.dept').forEach(el=>el.classList.add('open'))}
+function collapseAll(){document.querySelectorAll('.dept').forEach(el=>el.classList.remove('open'))}
+
+document.getElementById('search').addEventListener('input', e=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(currentView==='list'){
+    listSearch(q);
+  } else {
+    treeSearch(q);
+  }
+});
+
+function listSearch(q){
+  document.querySelectorAll('.match').forEach(el=>el.classList.remove('match'));
+  if(!q){collapseAll(); return;}
+  const openSet = new Set();
+  document.querySelectorAll('.chip').forEach(c=>{
+    if(c.dataset.text && c.dataset.text.includes(q)){
+      c.classList.add('match');
+      let el = c.closest('.dept');
+      while(el){openSet.add(el); el = el.parentElement.closest('.dept');}
+    }
+  });
+  document.querySelectorAll('.dept').forEach(d=>{
+    if(d.dataset.text && d.dataset.text.includes(q)){
+      d.querySelector('.dept-header').classList.add('match');
+      let el = d; while(el){openSet.add(el); el = el.parentElement.closest('.dept');}
+    }
+  });
+  document.querySelectorAll('.dept').forEach(el=>el.classList.remove('open'));
+  openSet.forEach(el=>el.classList.add('open'));
+  const first = document.querySelector('.match');
+  if(first) first.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+document.querySelectorAll('.dept.l0').forEach(el=>el.classList.add('open'));
+
+// ==================== 树状图视图 ====================
+let treeBuilt = false;
+let panX = 60, panY = 60, zoom = 1;
+const canvas = document.getElementById('tree-canvas');
+const treeView = document.getElementById('tree-view');
+
+function applyTransform(){
+  canvas.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
+  document.getElementById('zoom-label').textContent = Math.round(zoom*100)+'%';
+}
+
+function zoomIn(){ zoom = Math.min(zoom*1.2, 3); applyTransform(); }
+function zoomOut(){ zoom = Math.max(zoom/1.2, 0.15); applyTransform(); }
+function zoomReset(){ zoom=1; panX=60; panY=60; applyTransform(); }
+
+// 拖动平移
+let dragging=false, dragX=0, dragY=0;
+treeView.addEventListener('mousedown',e=>{
+  if(e.target.closest('.tcard')) return;
+  dragging=true; dragX=e.clientX-panX; dragY=e.clientY-panY;
+  treeView.classList.add('dragging');
+});
+window.addEventListener('mousemove',e=>{
+  if(!dragging) return;
+  panX = e.clientX - dragX; panY = e.clientY - dragY; applyTransform();
+});
+window.addEventListener('mouseup',()=>{dragging=false; treeView.classList.remove('dragging');});
+treeView.addEventListener('wheel',e=>{
+  e.preventDefault();
+  // 用 deltaY 幅度做指数缩放, 触控板/触屏细腻手势下不过冲
+  // ctrlKey=true 是 pinch (trackpad/触屏), 单独用更小系数
+  const isPinch = e.ctrlKey;
+  const sensitivity = isPinch ? 0.008 : 0.0025;
+  const factor = Math.exp(-e.deltaY * sensitivity);
+  const rect = treeView.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const newZoom = Math.max(0.15, Math.min(3, zoom * factor));
+  panX = mx - (mx - panX) * (newZoom / zoom);
+  panY = my - (my - panY) * (newZoom / zoom);
+  zoom = newZoom;
+  applyTransform();
+},{passive:false});
+
+// 触屏双指捏合缩放 (touch pinch)
+let _pinchDist = 0, _pinchCenter = null;
+treeView.addEventListener('touchstart', e=>{
+  if(e.touches.length === 2){
+    const t1 = e.touches[0], t2 = e.touches[1];
+    _pinchDist = Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
+    const rect = treeView.getBoundingClientRect();
+    _pinchCenter = {x: (t1.clientX+t2.clientX)/2 - rect.left, y: (t1.clientY+t2.clientY)/2 - rect.top};
+  }
+},{passive:true});
+treeView.addEventListener('touchmove', e=>{
+  if(e.touches.length === 2 && _pinchDist > 0){
+    e.preventDefault();
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const newDist = Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
+    // 用比值幂次做平滑; 0.6 让 pinch 缩放不过冲
+    const ratio = Math.pow(newDist / _pinchDist, 0.6);
+    const newZoom = Math.max(0.15, Math.min(3, zoom * ratio));
+    if(_pinchCenter){
+      const mx = _pinchCenter.x, my = _pinchCenter.y;
+      panX = mx - (mx - panX) * (newZoom / zoom);
+      panY = my - (my - panY) * (newZoom / zoom);
+    }
+    zoom = newZoom;
+    _pinchDist = newDist;
+    applyTransform();
+  }
+},{passive:false});
+treeView.addEventListener('touchend', e=>{
+  if(e.touches.length < 2){ _pinchDist = 0; _pinchCenter = null; }
+},{passive:true});
+
+function buildTree(){
+  treeBuilt = true;
+  canvas.innerHTML = '';
+  // 虚拟根节点: 淘宝闪购 · 雷雁群 (000474), 3个大部门挂在下面
+  const virtualRoot = {
+    deptNo: 'ROOT',
+    deptName: '淘宝闪购',
+    leader: '000474',
+    members: [],
+    subMs: [],
+    children: topDepts,
+    depth: 0,
+    subtreeSize: topDepts.reduce((s,d)=>s+(depts[d]?.subtreeSize||depts[d]?.members?.length||0),0),
+    _virtual: true,
+  };
+  const rootNode = buildTreeNode(virtualRoot, new Set());
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'padding:24px;display:inline-block;';
+  wrapper.appendChild(rootNode);
+  canvas.appendChild(wrapper);
+  // 自动展开根节点 (仅展开子节点, 不展开成员)
+  expandNodeChildren(rootNode);
+  applyTransform();
+}
+
+// 展开一个节点的子节点 (不影响成员显示)
+function expandNodeChildren(node){
+  const card = node.querySelector(':scope > .tcard');
+  const kidsMeta = node._kids || [];
+  const pseudo = node._pseudoMembersData;
+  card.classList.add('expanded');
+  // 若还没构建子节点, 现在构建
+  if(!node.dataset.childrenBuilt && (kidsMeta.length > 0 || pseudo)){
+    node.dataset.childrenBuilt = '1';
+    const childrenC = document.createElement('div');
+    childrenC.className = 'tchildren';
+    kidsMeta.forEach(cd => {
+      const cn = buildTreeNode(cd, new Set(node._seen||[]));
+      if(cn) childrenC.appendChild(cn);
+    });
+    // 直属成员/无团队M -> "其他"叶卡片, 置于所有子部门之后
+    if(pseudo){
+      const pn = buildTreeNode(pseudo, new Set(node._seen||[]));
+      if(pn) childrenC.appendChild(pn);
+    }
+    if(childrenC.children.length > 0) node.appendChild(childrenC);
+  }
+  const childrenEl = node.querySelector(':scope > .tchildren');
+  if(childrenEl) childrenEl.style.display = 'flex';
+}
+
+function collapseNodeChildren(node){
+  const childrenEl = node.querySelector(':scope > .tchildren');
+  if(childrenEl) childrenEl.style.display = 'none';
+  const card = node.querySelector(':scope > .tcard');
+  card.classList.remove('expanded');
+}
+
+function buildTreeNode(dOrDno, seen){
+  const d = (typeof dOrDno === 'object') ? dOrDno : depts[dOrDno];
+  if(!d) return null;
+  const dno = d.deptNo;
+  const isPseudo = !!d._pseudo_members;
+  if(!d._virtual && !isPseudo){
+    if(seen.has(dno)) return null;
+    seen.add(dno);
+  }
+
+  // ==== 合成"其他"叶卡片 (直属成员/无团队M) ====
+  if(isPseudo){
+    const node = document.createElement('div');
+    node.className = 'tnode';
+    node._dno = dno;
+    node._depth = d.depth ?? 0;
+    node._kids = [];
+    node._hasMembers = true;
+
+    const card = document.createElement('div');
+    card.className = 'tcard pseudo';
+    const total = d._memberPs.length + d._floatMs.length;
+    const nFloat = d._floatMs.length;
+    const anyUnexpanded = d._floatMs.some(w=>unexpandedM.has(w));
+    const searchText = [...d._memberPs, ...d._floatMs].map(w=>{
+      const p = people[w]||{};
+      return (p.name||'')+(p.nickName||'')+w;
+    }).join(' ').toLowerCase() + ' 其他';
+    card.dataset.text = searchText;
+    card.innerHTML = `
+      <div class="tname">${anyUnexpanded?DOT:''}其他</div>
+      <div class="tstats">总人数 <b>${total}</b> · 直属 <b>${total}</b> · M <b>${nFloat}</b> · 子部门 <b>0</b></div>
+    `;
+    const membersDiv = document.createElement('div');
+    membersDiv.className = 'tmembers';
+    mergedMembers(d._memberPs, d._floatMs).forEach(o=>{
+      const w = o.w, p = people[w]||{};
+      const row = document.createElement('div'); row.className='tm';
+      if(o.f){
+        const dot = unexpandedM.has(w) ? DOT : '';
+        row.innerHTML = `${dot}${p.name||'?'}${p.nickName?'·'+p.nickName:''} <span class="tw">(${w})</span> <span style="color:#7c889c;font-size:12px">·无团队M</span>${personChgHtml(w)}`;
+      } else {
+        row.innerHTML = `${p.name||'?'}${p.nickName?'·'+p.nickName:''} <span class="tw">(${w})</span>${personChgHtml(w)}`;
+      }
+      row.dataset.text = ((p.name||'')+(p.nickName||'')+w).toLowerCase();
+      membersDiv.appendChild(row);
+    });
+    sortOutMembers(d._out_members).forEach(m=>{
+      const row = document.createElement('div'); row.className='tm';
+      row.innerHTML = `<span style="color:#cf1322;text-decoration:line-through">${m.name||'?'}${m.nickName?'·'+m.nickName:''}</span> <span class="tw">(${m.w})</span><span class="pchg pchg-out">迁出</span>${m.to?`<span class="pchg-note to">→ ${m.to}</span>`:''}`;
+      row.dataset.text = ((m.name||'')+(m.nickName||'')+m.w).toLowerCase();
+      membersDiv.appendChild(row);
+    });
+    card.appendChild(membersDiv);
+    card.style.cursor = 'default';
+    node.appendChild(card);
+    return node;
+  }
+
+  // ==== 幽灵占位卡片 (7.27 已迁出团队旧位置, 虚线) ====
+  if(d._ghost727){
+    const node = document.createElement('div');
+    node.className = 'tnode'; node._dno = dno; node._kids = []; node._depth = d.depth ?? 0;
+    const card = document.createElement('div');
+    card.className = 'tcard t-ghost';
+    card.dataset.text = (d.deptName||'').toLowerCase();
+    card.innerHTML = `
+      <div class="tname">${d.deptName||'—'}</div>
+      <div class="tstats" style="color:#aaa">已迁出 → ${d._ghost727.wentToName}</div>`;
+    card.style.cursor = 'default';
+    node.appendChild(card);
+    return node;
+  }
+
+  const lv = Math.min(d.depth ?? 7, 7);
+  const leader = d.leader ? people[d.leader] : null;
+  const total = d.subtreeSize || d.members.length;
+  // 直属 = 直接挂在 leader 下的人(M+非M): 子部门数 + (成员里除 leader 外的人)
+  const direct = (d.children||[]).length + (d.members||[]).filter(w => w !== d.leader).length;
+  const memberPs = d.members.filter(w=>!people[w]?.isM);
+  const subDeptLeaders = new Set((d.children||[]).map(cd=>depts[cd]?.leader).filter(Boolean));
+  const floatMs = (d.subMs||[]).filter(w=>w!==d.leader && !subDeptLeaders.has(w));
+  const kids = sortChildren((d.children||[]).filter(cd => depts[cd]));
+  const isLeaf = kids.length === 0;
+  const nSubM = kids.length + floatMs.length;
+  const hasDirectMembers = memberPs.length + floatMs.length > 0;
+
+  const node = document.createElement('div');
+  node.className = 'tnode';
+  node._kids = kids;
+  node._seen = Array.from(seen);
+  node._dno = dno;
+  node._depth = d.depth ?? 0;
+
+  // 非末端 + 有直属成员/无团队M/迁出人员: 挂 pseudo-members 叶卡片作为第一个"子部门"
+  if(!isLeaf && (hasDirectMembers || (d._out_members&&d._out_members.length))){
+    node._pseudoMembersData = {
+      deptNo: dno + '-members',
+      _memberPs: memberPs,
+      _floatMs: floatMs,
+      _out_members: d._out_members || [],
+      _pseudo_members: true,
+      depth: (d.depth||0) + 1,
+    };
+  }
+
+  const card = document.createElement('div');
+  const _hasDesc = !d._new727 && !d._moved727 && d._desc_chg727 && d._desc_chg727.length;
+  card.className = 'tcard' + (isLeaf ? '' : ' expandable') + (d._new727?' t-new':'') + (d._moved727?' t-moved':'') + (_hasDesc?' t-desc':'');
+  card.dataset.text = ((d.deptName||'')+dno+(leader?.name||'')+(leader?.nickName||'')+(d.leader||'')).toLowerCase();
+  const needDot = d._virtual ? rootMarked : markDepts.has(dno);
+  const tlvHtml = `<span class="tlv" style="background:${LV_COLORS[lv]}">L${lv}</span>`;
+  const _chgBadge = d._new727 ? '<span class="chg-badge chg-new">新增</span>'
+    : d._moved727 ? `<span class="chg-badge chg-moved">迁入</span>` : '';
+  const _dirBadges = (!d._new727 && !d._moved727) ? directChgBadges(d) : '';
+  const _descDots = _hasDesc ? descDotsPropagated(d, true) : '';
+  const _leaderChg = leader ? personChgHtml(d.leader) : '';
+  const _dl = dualLinesText(dno);
+  const _dualChip = _dl ? `<div class="tdual" title="双线汇报：${_dl}">🔗 双线：${_dl}</div>` : '';
+  card.innerHTML = `
+    ${tlvHtml}
+    <div class="tname">${needDot?DOT:''}${d.deptName||'—'}${_chgBadge}${_dirBadges}${_descDots}</div>
+    <div class="tleader">${leader?leader.name+(leader.nickName?'·'+leader.nickName:'')+' ('+d.leader+')':'—'}${_leaderChg}</div>
+    <div class="tstats">总人数 <b>${total}</b> · 直属 <b>${direct}</b> · M <b>${nSubM}</b> · 子部门 <b>${kids.length}</b></div>
+    ${_dualChip}
+  `;
+
+  // 只有末端团队才把成员直接挂在自己卡片上; 非末端由 pseudo-members 叶卡片承担
+  if(isLeaf && (hasDirectMembers || (d._out_members&&d._out_members.length))){
+    const membersDiv = document.createElement('div');
+    membersDiv.className = 'tmembers';
+    mergedMembers(memberPs, floatMs).forEach(o=>{
+      const w = o.w, p = people[w]||{};
+      const row = document.createElement('div'); row.className='tm';
+      if(o.f){
+        const dot = unexpandedM.has(w) ? DOT : '';
+        row.innerHTML = `${dot}${p.name||'?'}${p.nickName?'·'+p.nickName:''} <span class="tw">(${w})</span> <span style="color:#7c889c;font-size:12px">·无团队M</span>${personChgHtml(w)}`;
+      } else {
+        row.innerHTML = `${p.name||'?'}${p.nickName?'·'+p.nickName:''} <span class="tw">(${w})</span>${personChgHtml(w)}`;
+      }
+      row.dataset.text = ((p.name||'')+(p.nickName||'')+w).toLowerCase();
+      membersDiv.appendChild(row);
+    });
+    sortOutMembers(d._out_members).forEach(m=>{
+      const row = document.createElement('div'); row.className='tm';
+      row.innerHTML = `<span style="color:#cf1322;text-decoration:line-through">${m.name||'?'}${m.nickName?'·'+m.nickName:''}</span> <span class="tw">(${m.w})</span><span class="pchg pchg-out">迁出</span>${m.to?`<span class="pchg-note to">→ ${m.to}</span>`:''}`;
+      row.dataset.text = ((m.name||'')+(m.nickName||'')+m.w).toLowerCase();
+      membersDiv.appendChild(row);
+    });
+    card.appendChild(membersDiv);
+  }
+  node._hasMembers = hasDirectMembers;
+
+  // 点击行为: 末端团队无需交互, 非末端切换子部门
+  if(!isLeaf){
+    card.onclick = (e) => {
+      e.stopPropagation();
+      const childrenEl = node.querySelector(':scope > .tchildren');
+      const currentlyOpen = childrenEl && childrenEl.style.display !== 'none';
+      if(currentlyOpen){
+        collapseNodeChildren(node);
+      } else {
+        expandNodeChildren(node);
+      }
+    };
+    card.style.cursor = 'pointer';
+  } else {
+    card.style.cursor = 'default';
+  }
+
+  node.appendChild(card);
+  return node;
+}
+
+// ==================== 树状图: 展开/收起 ====================
+function treeCollapseAll(){
+  // 保留根, 收起所有下级子部门 (成员始终可见, 不动)
+  document.querySelectorAll('#tree-canvas .tnode').forEach(n=>{
+    if(n._dno === 'ROOT') return;
+    const ch = n.querySelector(':scope > .tchildren');
+    if(ch) ch.style.display = 'none';
+    n.querySelector(':scope > .tcard').classList.remove('expanded','match','path');
+  });
+}
+
+// 展开到指定 depth (depth 由 dept.depth 表示; 根 ROOT=0, topDept=1)
+function treeExpandLevel(targetDepth){
+  treeCollapseAll();
+  // BFS 展开
+  const rootNode = document.querySelector('#tree-canvas > div > .tnode');
+  if(!rootNode) return;
+  function walk(node){
+    const d = node._depth || 0;
+    if(d >= targetDepth) return;
+    expandNodeChildren(node);
+    node.querySelectorAll(':scope > .tchildren > .tnode').forEach(walk);
+  }
+  walk(rootNode);
+}
+
+function treeExpandAll(){
+  // 全展开性能太糟(12000+人); 展到 L3
+  treeExpandLevel(3);
+}
+
+// ==================== 树状图: 搜索 ====================
+function treeSearch(q){
+  document.querySelectorAll('#tree-canvas .tcard').forEach(c=>c.classList.remove('match','path'));
+  document.querySelectorAll('#tree-canvas .tm').forEach(m=>m.style.background='');
+  if(!q) return;
+
+  // 1. 先在 depts/people 全量数据里定位命中的部门 (通过部门名/号/leader)
+  const hitDepts = new Set();
+  Object.values(depts).forEach(d=>{
+    const t = ((d.deptName||'')+d.deptNo+(people[d.leader]?.name||'')+(people[d.leader]?.nickName||'')+(d.leader||'')).toLowerCase();
+    if(t.includes(q)) hitDepts.add(d.deptNo);
+  });
+  // 2. 命中的人: 找出他所在的部门链
+  const hitPeopleDepts = new Set();
+  Object.entries(people).forEach(([w,p])=>{
+    const t = ((p.name||'')+(p.nickName||'')+w).toLowerCase();
+    if(!t.includes(q)) return;
+    // 找出所有以他为成员/leader 的部门
+    Object.values(depts).forEach(d=>{
+      if(d.leader===w || (d.members||[]).includes(w) || (d.subMs||[]).includes(w)){
+        hitPeopleDepts.add(d.deptNo);
+      }
+    });
+  });
+  const allHits = new Set([...hitDepts, ...hitPeopleDepts]);
+  if(allHits.size === 0) return;
+
+  // 3. 计算从根到每个命中部门的祖先链
+  const pathToRoot = new Set();
+  allHits.forEach(dno=>{
+    // 通过 dept.children 反查: 找哪些部门 children 包含 dno
+    let cur = dno;
+    while(cur){
+      pathToRoot.add(cur);
+      let parent = null;
+      for(const [pdno, pd] of Object.entries(depts)){
+        if((pd.children||[]).includes(cur)){ parent = pdno; break; }
+      }
+      cur = parent;
+    }
+  });
+
+  // 4. 从根开始, DFS 展开路径上的节点
+  const rootNode = document.querySelector('#tree-canvas > div > .tnode');
+  if(!rootNode) return;
+  treeCollapseAll();
+
+  function expandPath(node){
+    if(node._dno !== 'ROOT' && !pathToRoot.has(node._dno)) return;
+    if(node._kids && node._kids.length > 0){
+      // 需要展开子节点: 但只展开路径上的
+      expandNodeChildren(node);
+      // 递归
+      node.querySelectorAll(':scope > .tchildren > .tnode').forEach(expandPath);
+    }
+    // 高亮
+    const card = node.querySelector(':scope > .tcard');
+    if(allHits.has(node._dno)){
+      card.classList.add('match');
+      // 命中的人所在部门: 成员已常驻可见, 只需高亮命中行
+      const mem = card.querySelector('.tmembers');
+      mem?.querySelectorAll('.tm').forEach(row=>{
+        if(row.dataset.text && row.dataset.text.includes(q)) row.style.background = '#fff5d1';
+      });
+    } else if(pathToRoot.has(node._dno)){
+      card.classList.add('path');
+    }
+  }
+  expandPath(rootNode);
+
+  // 滚动到第一个 match
+  const first = document.querySelector('#tree-canvas .tcard.match');
+  if(first){
+    const rect = first.getBoundingClientRect();
+    const cRect = treeView.getBoundingClientRect();
+    // 计算 first 中心相对 canvas 位置
+    const cardCanvasX = (rect.left - cRect.left - panX) / zoom;
+    const cardCanvasY = (rect.top - cRect.top - panY) / zoom;
+    panX = cRect.width/2 - cardCanvasX * zoom - rect.width/2;
+    panY = cRect.height/2 - cardCanvasY * zoom - rect.height/2;
+    applyTransform();
+  }
+}
+
+try{window.zoomIn=zoomIn;window.zoomOut=zoomOut;window.zoomReset=zoomReset;}catch(e){}
+}
+</script>
+
+<div id="loginModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:24px 22px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:inherit;">
+    <div style="font-size:16px;font-weight:700;color:#1f2329;margin-bottom:8px;">解锁组织架构</div>
+    <div id="loginHint" style="font-size:12px;color:#7a8194;margin-bottom:12px;line-height:1.5;">数据由密语解密，密语只存在本机浏览器</div>
+    <input id="loginInput" type="password" placeholder="输入密钥" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #e5e6eb;border-radius:8px;font-size:14px;outline:none;" />
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+      <button id="btnLoginSkip" style="padding:8px 14px;border:1px solid #e5e6eb;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;color:#646a73;">仅看缓存</button>
+      <button id="btnLoginOk" style="padding:8px 16px;border:none;background:#1677ff;color:#fff;border-radius:8px;font-size:13px;cursor:pointer;">解锁</button>
+    </div>
+  </div>
+</div>
+<div id="updModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:24px 22px;width:460px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:inherit;">
+    <div style="font-size:16px;font-weight:700;color:#1f2329;margin-bottom:6px;">更新组织快照</div>
+    <div style="font-size:12px;color:#7a8194;margin-bottom:12px;line-height:1.5;">粘贴 DATASETS JSON（形如 {"日期":{people,depts,...}}），或选择 .json 文件。将按版本整体替换云端快照并刷新。</div>
+    <input id="updFile" type="file" accept=".json,application/json" style="font-size:12px;margin-bottom:10px;" />
+    <textarea id="updText" placeholder='{"26.7.27":{"people":{...},"depts":{...}}}' style="width:100%;box-sizing:border-box;height:150px;padding:10px;border:1px solid #e5e6eb;border-radius:8px;font-size:12px;font-family:ui-monospace,Menlo,monospace;outline:none;resize:vertical;"></textarea>
+    <div id="updStatus" style="font-size:12px;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+      <button id="updCancel" style="padding:8px 14px;border:1px solid #e5e6eb;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;color:#646a73;">取消</button>
+      <button id="updOk" style="padding:8px 16px;border:none;background:#1677ff;color:#fff;border-radius:8px;font-size:13px;cursor:pointer;">上传并刷新</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
