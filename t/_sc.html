@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>sc</title><body><pre id="TESTOUT">running</pre>
+<script>
+var q=new URLSearchParams(location.search);
+if(q.get('s')) try{ localStorage.setItem('expense-app-secret', q.get('s')); }catch(e){}
+var f=document.createElement('iframe');
+f.style.cssText='width:1400px;height:1000px;border:0';
+f.src=q.get('src'); document.body.appendChild(f);
+var img=document.createElement('img'); img.src=q.get('img'); img.style.cssText='width:1px;height:1px';
+document.body.appendChild(img);
+addEventListener('load',function(){
+  var d=f.contentDocument, st=d.getElementById('cloudStatus');
+  document.getElementById('TESTOUT').textContent=JSON.stringify({
+    status:st?st.textContent:null, gate:!!d.querySelector('#__sec'),
+    err:(d.querySelector('#__err')||{}).textContent||null,
+    bodyLen:d.body.innerText.length,
+    head:d.body.innerText.replace(/\s+/g,' ').slice(0,400)},null,1);
+});
+</script>
